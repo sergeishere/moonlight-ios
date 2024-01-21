@@ -50,4 +50,7 @@
 
 -(NSUInteger) getConnectedGamepadCount;
 
+- (void) attachGCEventInteractionToView:(UIView *)view;
+- (void) detachGCEventInteractionFromView:(UIView *)view;
+
 @end

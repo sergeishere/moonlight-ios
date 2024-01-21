@@ -12,6 +12,8 @@
 #import "OnScreenControls.h"
 
 #import "DataManager.h"
+#import "Moonlight-Swift.h"
+
 #include "Limelight.h"
 
 @import GameController;
@@ -22,14 +24,16 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 @implementation ControllerSupport {
     id _controllerConnectObserver;
     id _controllerDisconnectObserver;
-    id _mouseConnectObserver;
-    id _mouseDisconnectObserver;
-    id _keyboardConnectObserver;
-    id _keyboardDisconnectObserver;
+    GCMouse *_mouseConnectObserver;
+    GCMouse *_mouseDisconnectObserver;
+    GCKeyboard *_keyboardConnectObserver;
+    GCKeyboard *_keyboardDisconnectObserver;
     
     NSLock *_controllerStreamLock;
     NSMutableDictionary *_controllers;
     id<ControllerSupportDelegate> _delegate;
+    
+    GCEventInteraction *_gcEventInteraction;
     
     float accumulatedDeltaX;
     float accumulatedDeltaY;
@@ -1056,7 +1060,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     
     DataManager* dataMan = [[DataManager alloc] init];
     TemporarySettings* settings = [dataMan getSettings];
-    OnScreenControlsLevel level = (OnScreenControlsLevel)[settings.onscreenControls integerValue];
+    OnScreenControlsLevel level = (OnScreenControlsLevel)settings.onscreenControls;
     
     // Even if no gamepads are present, we will always count one if OSC is enabled,
     // or it's set to auto and no keyboard or mouse is present. Absolute touch mode
@@ -1088,7 +1092,10 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     _oscController.playerIndex = 0;
 
     DataManager* dataMan = [[DataManager alloc] init];
-    _oscEnabled = (OnScreenControlsLevel)[[dataMan getSettings].onscreenControls integerValue] != OnScreenControlsLevelOff;
+    _oscEnabled = (OnScreenControlsLevel)[dataMan getSettings].onscreenControls != OnScreenControlsLevelOff;
+    
+    _gcEventInteraction = [[GCEventInteraction alloc] init];
+    _gcEventInteraction.handledEventTypes = GCUIEventTypeGamepad;
     
     Log(LOG_I, @"Number of supported controllers connected: %d", [ControllerSupport getGamepadCount]);
     Log(LOG_I, @"Multi-controller: %d", _multiController);
@@ -1221,6 +1228,18 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     }
     
     return self;
+}
+
+// Attach the interaction to the view
+- (void)attachGCEventInteractionToView:(UIView *)view orLayer:(CALayer *)layer {
+    
+    [view addInteraction:_gcEventInteraction];
+    NSLog(@"Attached GCEventInteraction to view!");
+}
+// Detach the interaction from the view
+- (void)detachGCEventInteractionFromView:(UIView *)view {
+    [view removeInteraction:_gcEventInteraction];
+    NSLog(@"Detached GCEventInteraction from view!");
 }
 
 -(void) connectionEstablished

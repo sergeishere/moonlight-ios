@@ -20,11 +20,12 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
                               int write_seq_header);
 
 @implementation VideoDecoderRenderer {
-    StreamView* _view;
     id<ConnectionCallbacks> _callbacks;
     float _streamAspectRatio;
     
-    AVSampleBufferDisplayLayer* displayLayer;
+    AVSampleBufferVideoRenderer* _videoRenderer;
+//    AVSampleBufferDisplayLayer* displayLayer;
+    
     int videoFormat;
     int frameRate;
     
@@ -35,14 +36,16 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     
     CADisplayLink* _displayLink;
     BOOL framePacing;
+    
+    CGRect _lastKnownSize;
 }
 
 - (void)reinitializeDisplayLayer
 {
-    CALayer *oldLayer = displayLayer;
-    
-    displayLayer = [[AVSampleBufferDisplayLayer alloc] init];
-    displayLayer.backgroundColor = [UIColor blackColor].CGColor;
+//    CALayer *oldLayer = displayLayer;
+//    
+//    displayLayer = [[AVSampleBufferDisplayLayer alloc] init];
+//    displayLayer.backgroundColor = [UIColor blackColor].CGColor;
     
     // Ensure the AVSampleBufferDisplayLayer is sized to preserve the aspect ratio
     // of the video stream. We used to use AVLayerVideoGravityResizeAspect, but that
@@ -50,38 +53,37 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     // touch location to be wrong in StreamView if the aspect ratio of the host
     // desktop doesn't match the aspect ratio of the stream.
     CGSize videoSize;
-    if (_view.bounds.size.width > _view.bounds.size.height * _streamAspectRatio) {
-        videoSize = CGSizeMake(_view.bounds.size.height * _streamAspectRatio, _view.bounds.size.height);
-    } else {
-        videoSize = CGSizeMake(_view.bounds.size.width, _view.bounds.size.width / _streamAspectRatio);
-    }
-    displayLayer.position = CGPointMake(CGRectGetMidX(_view.bounds), CGRectGetMidY(_view.bounds));
-    displayLayer.bounds = CGRectMake(0, 0, videoSize.width, videoSize.height);
-    displayLayer.videoGravity = AVLayerVideoGravityResize;
+//    displayLayer.position = CGPointMake(CGRectGetMidX(_view.bounds), CGRectGetMidY(_view.bounds));
+//    displayLayer.bounds = CGRectMake(0, 0, videoSize.width, videoSize.height);
+//    displayLayer.videoGravity = AVLayerVideoGravityResize;
 
     // Hide the layer until we get an IDR frame. This ensures we
     // can see the loading progress label as the stream is starting.
-    displayLayer.hidden = YES;
+//    displayLayer.hidden = YES;
     
-    if (oldLayer != nil) {
-        // Switch out the old display layer with the new one
-        [_view.layer replaceSublayer:oldLayer with:displayLayer];
-    }
-    else {
-        [_view.layer addSublayer:displayLayer];
-    }
+//    if (oldLayer != nil) {
+//        // Switch out the old display layer with the new one
+//        [_view.layer replaceSublayer:oldLayer with:displayLayer];
+//    }
+//    else {
+//        [_view.layer addSublayer:displayLayer];
+//    }
     
     if (formatDesc != nil) {
         CFRelease(formatDesc);
         formatDesc = nil;
     }
+    
+//    [_view.widthAnchor constraintEqualToAnchor:_view.heightAnchor multiplier:_streamAspectRatio].active = true;
+    
+//    _lastKnownSize = _view.bounds;
 }
 
-- (id)initWithView:(StreamView*)view callbacks:(id<ConnectionCallbacks>)callbacks streamAspectRatio:(float)aspectRatio useFramePacing:(BOOL)useFramePacing
+- (id)initWithCallbacks:(id<ConnectionCallbacks>)callbacks sampleBufferVideoRenderer:(AVSampleBufferVideoRenderer*)renderer streamAspectRatio:(float)aspectRatio useFramePacing:(BOOL)useFramePacing
 {
     self = [super init];
     
-    _view = view;
+    _videoRenderer = renderer;
     _callbacks = callbacks;
     _streamAspectRatio = aspectRatio;
     framePacing = useFramePacing;
@@ -405,6 +407,9 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 - (int)submitDecodeBuffer:(unsigned char *)data length:(int)length bufferType:(int)bufferType decodeUnit:(PDECODE_UNIT)du
 {
     OSStatus status;
+    CMBlockBufferRef dataBlockBuffer = NULL;
+    CMBlockBufferRef frameBlockBuffer = NULL;
+    CMSampleBufferRef sampleBuffer = NULL;
     
     // Construct a new format description object each time we receive an IDR frame
     if (du->frameType == FRAME_TYPE_IDR) {
@@ -516,8 +521,20 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     }
     
     // Check for previous decoder errors before doing anything
-    if (displayLayer.status == AVQueuedSampleBufferRenderingStatusFailed) {
-        Log(LOG_E, @"Display layer rendering failed: %@", displayLayer.error);
+//    if (displayLayer.status == AVQueuedSampleBufferRenderingStatusFailed) {
+//        Log(LOG_E, @"Display layer rendering failed: %@", displayLayer.error);
+//        
+//        // Recreate the display layer. We are already on the main thread,
+//        // so this is safe to do right here.
+//        [self reinitializeDisplayLayer];
+//        
+//        // Request an IDR frame to initialize the new decoder
+//        free(data);
+//        return DR_NEED_IDR;
+//    }
+    
+    if (_videoRenderer.status == AVQueuedSampleBufferRenderingStatusFailed) {
+        Log(LOG_E, @"Sample buffer video render rendering failed: %@", _videoRenderer.error);
         
         // Recreate the display layer. We are already on the main thread,
         // so this is safe to do right here.
@@ -527,10 +544,6 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         free(data);
         return DR_NEED_IDR;
     }
-    
-    // Now we're decoding actual frame data here
-    CMBlockBufferRef frameBlockBuffer;
-    CMBlockBufferRef dataBlockBuffer;
     
     status = CMBlockBufferCreateWithMemoryBlock(NULL, data, length, kCFAllocatorDefault, NULL, 0, length, 0, &dataBlockBuffer);
     if (status != noErr) {
@@ -574,11 +587,11 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         status = CMBlockBufferAppendBufferReference(frameBlockBuffer, dataBlockBuffer, 0, length, 0);
         if (status != noErr) {
             Log(LOG_E, @"CMBlockBufferAppendBufferReference failed: %d", (int)status);
+            CFRelease(dataBlockBuffer);
+            CFRelease(frameBlockBuffer);
             return DR_NEED_IDR;
         }
     }
-        
-    CMSampleBufferRef sampleBuffer;
     
     CMSampleTimingInfo sampleTiming = {kCMTimeInvalid, CMTimeMake(du->presentationTimeMs, 1000), kCMTimeInvalid};
     
@@ -595,11 +608,14 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     }
 
     // Enqueue the next frame
-    [self->displayLayer enqueueSampleBuffer:sampleBuffer];
+//    [self->displayLayer enqueueSampleBuffer:sampleBuffer];
+    if ([self->_videoRenderer isReadyForMoreMediaData]) {
+        [self->_videoRenderer enqueueSampleBuffer:sampleBuffer];
+    }
     
     if (du->frameType == FRAME_TYPE_IDR) {
         // Ensure the layer is visible now
-        self->displayLayer.hidden = NO;
+//        self->displayLayer.hidden = NO;
         
         // Tell our parent VC to hide the progress indicator
         [self->_callbacks videoContentShown];

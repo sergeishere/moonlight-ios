@@ -21,16 +21,16 @@
 
 @implementation StreamManager {
     StreamConfiguration* _config;
-
     UIView* _renderView;
+    AVSampleBufferVideoRenderer* _videoRenderer;
     id<ConnectionCallbacks> _callbacks;
-    Connection* _connection;
 }
 
-- (id) initWithConfig:(StreamConfiguration*)config renderView:(UIView*)view connectionCallbacks:(id<ConnectionCallbacks>)callbacks {
+- (id) initWithConfig:(StreamConfiguration*)config renderView:(UIView*)view sampleBufferVideoRenderer:(AVSampleBufferVideoRenderer*)renderer connectionCallbacks:(id<ConnectionCallbacks>)callbacks {
     self = [super init];
     _config = config;
     _renderView = view;
+    _videoRenderer = renderer;
     _callbacks = callbacks;
     _config.riKey = [Utils randomBytes:16];
     _config.riKeyId = arc4random();
@@ -99,7 +99,10 @@
     
     // Initializing the renderer must be done on the main thread
     dispatch_async(dispatch_get_main_queue(), ^{
-        VideoDecoderRenderer* renderer = [[VideoDecoderRenderer alloc] initWithView:self->_renderView callbacks:self->_callbacks streamAspectRatio:(float)self->_config.width / (float)self->_config.height useFramePacing:self->_config.useFramePacing];
+        VideoDecoderRenderer* renderer = [[VideoDecoderRenderer alloc] initWithCallbacks:self->_callbacks
+                                                               sampleBufferVideoRenderer:_videoRenderer
+                                                                       streamAspectRatio:(float)self->_config.width / (float)self->_config.height
+                                                                          useFramePacing:self->_config.useFramePacing];
         self->_connection = [[Connection alloc] initWithConfig:self->_config renderer:renderer connectionCallbacks:self->_callbacks];
         NSOperationQueue* opQueue = [[NSOperationQueue alloc] init];
         [opQueue addOperation:self->_connection];

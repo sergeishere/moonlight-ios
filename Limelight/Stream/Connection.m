@@ -234,6 +234,14 @@ int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, v
     // Start playback
     SDL_PauseAudioDevice(audioDevice, 0);
     
+    // Disable ducking so other audio sources aren't quiet.
+    NSError* categoryErr;
+    AVAudioSession* session = [AVAudioSession sharedInstance];
+    BOOL success = [session setCategory: session.category withOptions:AVAudioSessionCategoryOptionMixWithOthers error:&categoryErr];
+    if (success == NO) {
+        Log(LOG_E, @"Unable to set AVAudioSession category");
+    }
+    
     return 0;
 }
 
@@ -420,9 +428,6 @@ void ClSetControllerLED(uint16_t controllerNumber, uint8_t r, uint8_t g, uint8_t
     _streamConfig.supportedVideoFormats = config.supportedVideoFormats;
     _streamConfig.audioConfiguration = config.audioConfiguration;
     
-    // Since we require iOS 12 or above, we're guaranteed to be running
-    // on a 64-bit device with ARMv8 crypto instructions, so we don't
-    // need to check for that here.
     _streamConfig.encryptionFlags = ENCFLG_ALL;
     
     if ([Utils isActiveNetworkVPN]) {

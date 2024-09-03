@@ -1,0 +1,51 @@
+//
+//  ios.xcconfig
+//  Moonlight
+//
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+PRODUCT_BUNDLE_IDENTIFIER = com.moonlight-stream.Moonlight
+DEVELOPMENT_TEAM = DM46QST4M7
+
+CODE_SIGN_IDENTITY = iPhone Developer
+CODE_SIGN_IDENTITY[sdk=iphoneos*] = iPhone Developer
+
+PRODUCT_NAME = $(TARGET_NAME)
+
+INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.games
+SKIP_INSTALL = NO
+LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/Frameworks
+INFOPLIST_FILE = Limelight/Limelight-Info.plist
+ENABLE_PREVIEWS = YES
+
+TARGETED_DEVICE_FAMILY = 1, 2
+SWIFT_EMIT_LOC_STRINGS = YES
+
+CURRENT_PROJECT_VERSION = 1
+MARKETING_VERSION = 9.0.2
+
+IPHONEOS_DEPLOYMENT_TARGET = 12.0
+
+GCC_PRECOMPILE_PREFIX_HEADER = YES
+GCC_PREFIX_HEADER = Limelight/Limelight-Prefix.pch
+CLANG_ENABLE_MODULES = YES
+
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
+SWIFT_VERSION = 5.0
+SUPPORTS_MACCATALYST = NO
+
+SWIFT_COMPILATION_MODE[config=Release] = wholemodule
+
+SWIFT_OPTIMIZATION_LEVEL[config=Debug] = -Onone
+SWIFT_OPTIMIZATION_LEVEL[config=Release] = -O
+
+SWIFT_OBJC_INTERFACE_HEADER_NAME = Moonlight-Swift.h
+SWIFT_OBJC_BRIDGING_HEADER = Limelight/Input/Moonlight-Bridging-Header.h
+
+INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.games
+INFOPLIST_KEY_NSLocalNetworkUsageDescription = Starlight uses the local network to connect to your gaming PC for streaming.
+INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait
+
+#include "Configurations/credentials.xcconfig"
+#include "Configurations/paths.xcconfig"

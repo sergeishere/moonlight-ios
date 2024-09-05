@@ -30,7 +30,7 @@ static const int LABEL_DY = 20;
 - (id) init {
     self = [super init];
         
-#if TARGET_OS_TV
+#if TARGET_OS_TV || TARGET_OS_VISION
     self.frame = CGRectMake(0, 0, 400, 400);
 #else
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
@@ -54,7 +54,11 @@ static const int LABEL_DY = 20;
     _hostLabel.textColor = [UIColor whiteColor];
     
     _hostOverlay = [[UIImageView alloc] initWithFrame:CGRectMake(self.frame.size.width / 3, _hostIcon.frame.size.height / 4, _hostIcon.frame.size.width / 3, self.frame.size.height / 3)];
+#if TARGET_OS_VISION
+    _hostSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleLarge];
+#else
     _hostSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+#endif
     [_hostSpinner setFrame:_hostOverlay.frame];
     _hostSpinner.userInteractionEnabled = NO;
     _hostSpinner.hidesWhenStopped = YES;

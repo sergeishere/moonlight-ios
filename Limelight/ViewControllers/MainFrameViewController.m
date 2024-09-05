@@ -436,12 +436,25 @@ static NSMutableSet* hostList;
 }
 
 - (UIViewController*) activeViewController {
+#if TARGET_OS_VISION
+    // Get the active scene
+    UIWindowScene *activeScene = nil;
+    for (UIScene *scene in [UIApplication sharedApplication].connectedScenes) {
+        if ([scene isKindOfClass:[UIWindowScene class]] && scene.activationState == UISceneActivationStateForegroundActive) {
+            activeScene = (UIWindowScene *)scene;
+            break;
+        }
+    }
+    
+    UIViewController *topController = activeScene ? activeScene.windows.firstObject.rootViewController : nil;
+#else
     UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
-
+#endif
+    
     while (topController.presentedViewController) {
         topController = topController.presentedViewController;
     }
-
+    
     return topController;
 }
 
@@ -614,11 +627,19 @@ static NSMutableSet* hostList;
     
     _streamConfig.frameRate = [streamSettings.framerate intValue];
     if (@available(iOS 10.3, *)) {
+#if TARGET_OS_VISION
+        // Don't stream more FPS than the display can show
+        if (_streamConfig.frameRate > 90) {
+            _streamConfig.frameRate = 90;
+            Log(LOG_W, @"Clamping FPS to maximum refresh rate: %d", _streamConfig.frameRate);
+        }
+#else
         // Don't stream more FPS than the display can show
         if (_streamConfig.frameRate > [UIScreen mainScreen].maximumFramesPerSecond) {
             _streamConfig.frameRate = (int)[UIScreen mainScreen].maximumFramesPerSecond;
             Log(LOG_W, @"Clamping FPS to maximum refresh rate: %d", _streamConfig.frameRate);
         }
+#endif
     }
     
     _streamConfig.height = [streamSettings.height intValue];

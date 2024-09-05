@@ -62,7 +62,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [keyInputField setSpellCheckingType:UITextSpellCheckingTypeNo];
     [self addSubview:keyInputField];
     
-#if TARGET_OS_TV
+#if TARGET_OS_TV 
     // tvOS requires RelativeTouchHandler to manage Apple Remote input
     self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self];
 #else
@@ -361,7 +361,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 // Prepare the textbox used to capture keyboard events.
                 keyInputField.delegate = self;
                 keyInputField.text = @"0";
-#if !TARGET_OS_TV
+#if !TARGET_OS_TV && !TARGET_OS_VISION
                 // Prepare the toolbar above the keyboard for more options
                 UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
                 

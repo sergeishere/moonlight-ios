@@ -189,15 +189,20 @@ BOOL isCustomResolution(CGSize res) {
     }
 
     // Only show the 120 FPS option if we have a > 60-ish Hz display
+#if TARGET_OS_VISION
+    [self.framerateSelector removeSegmentAtIndex:3 animated:NO];
+#else
     bool enable120Fps = false;
     if (@available(iOS 10.3, tvOS 10.3, *)) {
+
         if ([UIScreen mainScreen].maximumFramesPerSecond > 62) {
             enable120Fps = true;
         }
     }
     if (!enable120Fps) {
-        [self.framerateSelector removeSegmentAtIndex:2 animated:NO];
+        [self.framerateSelector removeSegmentAtIndex:3 animated:NO];
     }
+#endif
 
     // Disable codec selector segments for unsupported codecs
 #if defined(__IPHONE_16_0) || defined(__TVOS_16_0)
@@ -474,6 +479,8 @@ BOOL isCustomResolution(CGSize res) {
         case 1:
             return 60;
         case 2:
+            return 90;
+        case 3:
             return 120;
         default:
             abort();

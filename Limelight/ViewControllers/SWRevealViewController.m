@@ -36,13 +36,14 @@
 static CGFloat statusBarAdjustment( UIView* view )
 {
     CGFloat adjustment = 0.0f;
+#if !TARGET_OS_VISION
     UIApplication *app = [UIApplication sharedApplication];
     CGRect viewFrame = [view convertRect:view.bounds toView:[app keyWindow]];
     CGRect statusBarFrame = [app statusBarFrame];
     
     if ( CGRectIntersectsRect(viewFrame, statusBarFrame) )
         adjustment = fminf(statusBarFrame.size.width, statusBarFrame.size.height);
-
+#endif
     return adjustment;
 }
 
@@ -690,10 +691,10 @@ const int FrontViewPositionNone = 0xff;
     
     // On iOS7 the applicationFrame does not return the whole screen. This is possibly a bug.
     // As a workaround we use the screen bounds, this still works on iOS6, any zero based frame would work anyway!
-    CGRect frame = [[UIScreen mainScreen] bounds];
+//    CGRect frame = [[UIScreen mainScreen] bounds];
 
     // create a custom content view for the controller
-    _contentView = [[SWRevealView alloc] initWithFrame:frame controller:self];
+    _contentView = [[SWRevealView alloc] initWithFrame:CGRectZero controller:self];
     
     // set the content view to resize along with its superview
     [_contentView setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
@@ -1421,8 +1422,10 @@ const int FrontViewPositionNone = 0xff;
     
     void (^animations)(void) = ^(void)
     {
+#if !TARGET_OS_VISION
         // Calling this in the animation block causes the status bar to appear/dissapear in sync with our own animation
         [self setNeedsStatusBarAppearanceUpdate];
+#endif
         
         // We call the layoutSubviews method on the contentView view and send a delegate, which will
         // occur inside of an animation block if any animated transition is being performed
@@ -1633,6 +1636,7 @@ const int FrontViewPositionNone = 0xff;
     controllerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     controllerView.frame = frame;
     
+#if !TARGET_OS_VISION
     if ( [controllerView isKindOfClass:[UIScrollView class]] )
     {
         BOOL adjust = controller.automaticallyAdjustsScrollViewInsets;
@@ -1642,6 +1646,7 @@ const int FrontViewPositionNone = 0xff;
             [(id)controllerView setContentInset:UIEdgeInsetsMake(statusBarAdjustment(_contentView), 0, 0, 0)];
         }
     }
+#endif
     
     [view addSubview:controllerView];
     

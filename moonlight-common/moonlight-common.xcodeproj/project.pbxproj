@@ -7,6 +7,37 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		95D5ADD22C88E4A70015818C /* SimpleStun.c in Sources */ = {isa = PBXBuildFile; fileRef = 98C1FC11218404030023FDDF /* SimpleStun.c */; };
+		95D5ADD32C88E4A70015818C /* RtpAudioQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 98F145332667D847004018E3 /* RtpAudioQueue.c */; };
+		95D5ADD42C88E4A70015818C /* AudioStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E1A1CAD423B0089BB98 /* AudioStream.c */; };
+		95D5ADD52C88E4A70015818C /* ByteBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E1B1CAD423B0089BB98 /* ByteBuffer.c */; };
+		95D5ADD62C88E4A70015818C /* Connection.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E1D1CAD423B0089BB98 /* Connection.c */; };
+		95D5ADD72C88E4A70015818C /* ControlStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E1E1CAD423B0089BB98 /* ControlStream.c */; };
+		95D5ADD82C88E4A70015818C /* FakeCallbacks.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E1F1CAD423B0089BB98 /* FakeCallbacks.c */; };
+		95D5ADD92C88E4A70015818C /* InputStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E211CAD423B0089BB98 /* InputStream.c */; };
+		95D5ADDA2C88E4A70015818C /* ConnectionTester.c in Sources */ = {isa = PBXBuildFile; fileRef = 983091DD24CEB69B00A0835D /* ConnectionTester.c */; };
+		95D5ADDB2C88E4A70015818C /* LinkedBlockingQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E241CAD423B0089BB98 /* LinkedBlockingQueue.c */; };
+		95D5ADDC2C88E4A70015818C /* Misc.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E261CAD423B0089BB98 /* Misc.c */; };
+		95D5ADDD2C88E4A70015818C /* Platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E311CAD423B0089BB98 /* Platform.c */; };
+		95D5ADDE2C88E4A70015818C /* PlatformSockets.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E331CAD423B0089BB98 /* PlatformSockets.c */; };
+		95D5ADDF2C88E4A70015818C /* RtspConnection.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E391CAD423B0089BB98 /* RtspConnection.c */; };
+		95D5ADE02C88E4A70015818C /* RtspParser.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3A1CAD423B0089BB98 /* RtspParser.c */; };
+		95D5ADE12C88E4A70015818C /* SdpGenerator.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3B1CAD423B0089BB98 /* SdpGenerator.c */; };
+		95D5ADE22C88E4A70015818C /* RtpVideoQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 98F145342667D847004018E3 /* RtpVideoQueue.c */; };
+		95D5ADE32C88E4A70015818C /* VideoDepacketizer.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3D1CAD423B0089BB98 /* VideoDepacketizer.c */; };
+		95D5ADE42C88E4A70015818C /* VideoStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3E1CAD423B0089BB98 /* VideoStream.c */; };
+		95D5ADE52C88E4A70015818C /* PlatformCrypto.c in Sources */ = {isa = PBXBuildFile; fileRef = 98B8C2B5262BC1220027F659 /* PlatformCrypto.c */; };
+		95D5ADE62C88E4A70015818C /* callbacks.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2DF01CAD422B0089BB98 /* callbacks.c */; };
+		95D5ADE72C88E4A70015818C /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2DF31CAD422B0089BB98 /* compress.c */; };
+		95D5ADE82C88E4A70015818C /* host.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E001CAD422B0089BB98 /* host.c */; };
+		95D5ADE92C88E4A70015818C /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E0E1CAD422B0089BB98 /* list.c */; };
+		95D5ADEA2C88E4A70015818C /* packet.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E121CAD422B0089BB98 /* packet.c */; };
+		95D5ADEB2C88E4A70015818C /* peer.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E131CAD422B0089BB98 /* peer.c */; };
+		95D5ADEC2C88E4A70015818C /* protocol.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E151CAD422B0089BB98 /* protocol.c */; };
+		95D5ADED2C88E4A70015818C /* rs.c in Sources */ = {isa = PBXBuildFile; fileRef = 9857AEEE1EBE85E10084F99E /* rs.c */; };
+		95D5ADEE2C88E4A70015818C /* unix.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E171CAD422B0089BB98 /* unix.c */; };
+		95D5ADEF2C88E4A70015818C /* win32.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E181CAD422B0089BB98 /* win32.c */; };
+		95D5ADF12C88E4A70015818C /* OpenSSL in Frameworks */ = {isa = PBXBuildFile; productRef = 95D5ADCF2C88E4A70015818C /* OpenSSL */; };
 		983091DE24CEB69B00A0835D /* ConnectionTester.c in Sources */ = {isa = PBXBuildFile; fileRef = 983091DD24CEB69B00A0835D /* ConnectionTester.c */; };
 		983091DF24CEB69B00A0835D /* ConnectionTester.c in Sources */ = {isa = PBXBuildFile; fileRef = 983091DD24CEB69B00A0835D /* ConnectionTester.c */; };
 		9857AEF01EBE85E10084F99E /* rs.c in Sources */ = {isa = PBXBuildFile; fileRef = 9857AEEE1EBE85E10084F99E /* rs.c */; };
@@ -84,6 +115,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		95D5ADF52C88E4A70015818C /* libmoonlight-common-vision.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmoonlight-common-vision.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		983091DD24CEB69B00A0835D /* ConnectionTester.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ConnectionTester.c; sourceTree = "<group>"; };
 		9857AEEE1EBE85E10084F99E /* rs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = rs.c; path = "moonlight-common-c/reedsolomon/rs.c"; sourceTree = "<group>"; };
 		9857AEEF1EBE85E10084F99E /* rs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = rs.h; path = "moonlight-common-c/reedsolomon/rs.h"; sourceTree = "<group>"; };
@@ -161,6 +193,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		95D5ADF02C88E4A70015818C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95D5ADF12C88E4A70015818C /* OpenSSL in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FB1A67EC21324EE300507771 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -322,6 +362,7 @@
 			children = (
 				FB290E2E19B37A4E004C83CF /* libmoonlight-common.a */,
 				FB1A67EF21324EE300507771 /* libmoonlight-common-tv.a */,
+				95D5ADF52C88E4A70015818C /* libmoonlight-common-vision.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -329,6 +370,25 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		95D5ADCE2C88E4A70015818C /* moonlight-common-vision */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95D5ADF22C88E4A70015818C /* Build configuration list for PBXNativeTarget "moonlight-common-vision" */;
+			buildPhases = (
+				95D5ADD12C88E4A70015818C /* Sources */,
+				95D5ADF02C88E4A70015818C /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "moonlight-common-vision";
+			packageProductDependencies = (
+				95D5ADCF2C88E4A70015818C /* OpenSSL */,
+			);
+			productName = "limelight-common";
+			productReference = 95D5ADF52C88E4A70015818C /* libmoonlight-common-vision.a */;
+			productType = "com.apple.product-type.library.static";
+		};
 		FB1A67EE21324EE300507771 /* moonlight-common-tv */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = FB1A67F721324EE300507771 /* Build configuration list for PBXNativeTarget "moonlight-common-tv" */;
@@ -402,11 +462,49 @@
 			targets = (
 				FB290E2D19B37A4E004C83CF /* moonlight-common */,
 				FB1A67EE21324EE300507771 /* moonlight-common-tv */,
+				95D5ADCE2C88E4A70015818C /* moonlight-common-vision */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		95D5ADD12C88E4A70015818C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95D5ADD22C88E4A70015818C /* SimpleStun.c in Sources */,
+				95D5ADD32C88E4A70015818C /* RtpAudioQueue.c in Sources */,
+				95D5ADD42C88E4A70015818C /* AudioStream.c in Sources */,
+				95D5ADD52C88E4A70015818C /* ByteBuffer.c in Sources */,
+				95D5ADD62C88E4A70015818C /* Connection.c in Sources */,
+				95D5ADD72C88E4A70015818C /* ControlStream.c in Sources */,
+				95D5ADD82C88E4A70015818C /* FakeCallbacks.c in Sources */,
+				95D5ADD92C88E4A70015818C /* InputStream.c in Sources */,
+				95D5ADDA2C88E4A70015818C /* ConnectionTester.c in Sources */,
+				95D5ADDB2C88E4A70015818C /* LinkedBlockingQueue.c in Sources */,
+				95D5ADDC2C88E4A70015818C /* Misc.c in Sources */,
+				95D5ADDD2C88E4A70015818C /* Platform.c in Sources */,
+				95D5ADDE2C88E4A70015818C /* PlatformSockets.c in Sources */,
+				95D5ADDF2C88E4A70015818C /* RtspConnection.c in Sources */,
+				95D5ADE02C88E4A70015818C /* RtspParser.c in Sources */,
+				95D5ADE12C88E4A70015818C /* SdpGenerator.c in Sources */,
+				95D5ADE22C88E4A70015818C /* RtpVideoQueue.c in Sources */,
+				95D5ADE32C88E4A70015818C /* VideoDepacketizer.c in Sources */,
+				95D5ADE42C88E4A70015818C /* VideoStream.c in Sources */,
+				95D5ADE52C88E4A70015818C /* PlatformCrypto.c in Sources */,
+				95D5ADE62C88E4A70015818C /* callbacks.c in Sources */,
+				95D5ADE72C88E4A70015818C /* compress.c in Sources */,
+				95D5ADE82C88E4A70015818C /* host.c in Sources */,
+				95D5ADE92C88E4A70015818C /* list.c in Sources */,
+				95D5ADEA2C88E4A70015818C /* packet.c in Sources */,
+				95D5ADEB2C88E4A70015818C /* peer.c in Sources */,
+				95D5ADEC2C88E4A70015818C /* protocol.c in Sources */,
+				95D5ADED2C88E4A70015818C /* rs.c in Sources */,
+				95D5ADEE2C88E4A70015818C /* unix.c in Sources */,
+				95D5ADEF2C88E4A70015818C /* win32.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FB1A67EB21324EE300507771 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -484,6 +582,40 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		95D5ADF32C88E4A70015818C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				EXECUTABLE_PREFIX = lib;
+				HEADER_SEARCH_PATHS = (
+					"moonlight-common-c/enet/include",
+					"../libs/**",
+				);
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = xros;
+				SUPPORTED_PLATFORMS = "xrsimulator xros";
+			};
+			name = Debug;
+		};
+		95D5ADF42C88E4A70015818C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				EXECUTABLE_PREFIX = lib;
+				HEADER_SEARCH_PATHS = (
+					"moonlight-common-c/enet/include",
+					"../libs/**",
+				);
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = xros;
+				SUPPORTED_PLATFORMS = "xrsimulator xros";
+			};
+			name = Release;
+		};
 		FB1A67F521324EE300507771 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -708,6 +840,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		95D5ADF22C88E4A70015818C /* Build configuration list for PBXNativeTarget "moonlight-common-vision" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95D5ADF32C88E4A70015818C /* Debug */,
+				95D5ADF42C88E4A70015818C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		FB1A67F721324EE300507771 /* Build configuration list for PBXNativeTarget "moonlight-common-tv" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -738,6 +879,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		95D5ADD02C88E4A70015818C /* XCRemoteSwiftPackageReference "OpenSSL-Package" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/krzyzanowskim/OpenSSL-Package.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.5004;
+			};
+		};
 		F74BEF9D2C1A707200224667 /* XCRemoteSwiftPackageReference "OpenSSL-Package" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/krzyzanowskim/OpenSSL-Package.git";
@@ -749,6 +898,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		95D5ADCF2C88E4A70015818C /* OpenSSL */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 95D5ADD02C88E4A70015818C /* XCRemoteSwiftPackageReference "OpenSSL-Package" */;
+			productName = OpenSSL;
+		};
 		F74BEF9E2C1A707200224667 /* OpenSSL */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = F74BEF9D2C1A707200224667 /* XCRemoteSwiftPackageReference "OpenSSL-Package" */;

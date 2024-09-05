@@ -9,7 +9,6 @@ PRODUCT_BUNDLE_IDENTIFIER = com.moonlight-stream.Moonlight
 DEVELOPMENT_TEAM = DM46QST4M7
 
 CODE_SIGN_IDENTITY = iPhone Developer
-CODE_SIGN_IDENTITY[sdk=iphoneos*] = iPhone Developer
 
 PRODUCT_NAME = $(TARGET_NAME)
 
@@ -21,6 +20,8 @@ ENABLE_PREVIEWS = YES
 
 TARGETED_DEVICE_FAMILY = 1, 2
 SWIFT_EMIT_LOC_STRINGS = YES
+
+OTHER_LDFLAGS = $(inherited) -lxml2 -lopus
 
 CURRENT_PROJECT_VERSION = 1
 MARKETING_VERSION = 9.0.2
@@ -46,6 +47,10 @@ SWIFT_OBJC_BRIDGING_HEADER = Limelight/Input/Moonlight-Bridging-Header.h
 INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.games
 INFOPLIST_KEY_NSLocalNetworkUsageDescription = Starlight uses the local network to connect to your gaming PC for streaming.
 INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait
+
+SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO
+SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO
+
 
 #include "Configurations/credentials.xcconfig"
 #include "Configurations/paths.xcconfig"

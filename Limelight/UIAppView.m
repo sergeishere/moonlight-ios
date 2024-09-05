@@ -67,6 +67,11 @@ static UIImage* noImage;
     
 #if TARGET_OS_TV
     _appImage.adjustsImageWhenAncestorFocused = YES;
+#elif TARGET_OS_VISION
+    if (@available(iOS 13.4.1, *)) {
+        // Allow the button style to change when moused over
+        self.pointerInteractionEnabled = YES;
+    }
 #else
     // Rasterizing the cell layer increases rendering performance by quite a bit
     // but we want it unrasterized for tvOS where it must be scaled.

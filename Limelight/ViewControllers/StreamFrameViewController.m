@@ -48,7 +48,7 @@
     BOOL _userIsInteracting;
     CGSize _keyboardSize;
     
-#if !TARGET_OS_TV
+#if !TARGET_OS_TV && !TARGET_OS_VISION
     UIScreenEdgePanGestureRecognizer *_exitSwipeRecognizer;
 #endif
 }
@@ -97,6 +97,8 @@
     [_spinner setUserInteractionEnabled:NO];
 #if TARGET_OS_TV
     [_spinner setActivityIndicatorViewStyle:UIActivityIndicatorViewStyleWhiteLarge];
+#elif TARGET_OS_VISION
+    [_spinner setActivityIndicatorViewStyle:UIActivityIndicatorViewStyleLarge];
 #else
     [_spinner setActivityIndicatorViewStyle:UIActivityIndicatorViewStyleWhite];
 #endif
@@ -127,7 +129,8 @@
     [self.view addGestureRecognizer:_menuTapGestureRecognizer];
     [self.view addGestureRecognizer:_menuDoubleTapGestureRecognizer];
     [self.view addGestureRecognizer:_playPauseTapGestureRecognizer];
-
+#elif TARGET_OS_VISION
+    // TODO: - Handle this
 #else
     _exitSwipeRecognizer = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(edgeSwiped)];
     _exitSwipeRecognizer.edges = UIRectEdgeLeft;

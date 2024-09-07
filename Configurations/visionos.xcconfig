@@ -13,7 +13,7 @@ CODE_SIGN_IDENTITY = iPhone Developer
 SDKROOT = xros
 //SUPPORTED_PLATFORMS = xros xrsimulator
 
-OTHER_LDFLAGS = $(inherited) -ObjC -lxml2 -lopus -lavutil -lavformat -lavcodec
+OTHER_LDFLAGS = $(inherited) -lxml2 -lopus -lavutil -lavformat -lavcodec -lssl -lcrypto
 
 DEBUG_INFORMATION_FORMAT[config=Debug] = dwarf
 DEBUG_INFORMATION_FORMAT[config=Release] = dwarf-with-dsym

@@ -21,7 +21,7 @@ ENABLE_PREVIEWS = YES
 TARGETED_DEVICE_FAMILY = 1, 2
 SWIFT_EMIT_LOC_STRINGS = YES
 
-OTHER_LDFLAGS = $(inherited) -lxml2 -lopus
+OTHER_LDFLAGS = $(inherited) -lxml2 -lopus -lavutil -lavformat -lavcodec -lssl -lcrypto
 
 CURRENT_PROJECT_VERSION = 1
 MARKETING_VERSION = 9.0.2

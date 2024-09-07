@@ -142,7 +142,11 @@ BOOL isCustomResolution(CGSize res) {
 
     // Get the size of the screen with and without safe area insets
     UIWindow *window = UIApplication.sharedApplication.windows.firstObject;
+#if TARGET_OS_VISION
+    CGFloat screenScale = 3.0;
+#else
     CGFloat screenScale = window.screen.scale;
+#endif
     CGFloat safeAreaWidth = (window.frame.size.width - window.safeAreaInsets.left - window.safeAreaInsets.right) * screenScale;
     CGFloat fullScreenWidth = window.frame.size.width * screenScale;
     CGFloat fullScreenHeight = window.frame.size.height * screenScale;
@@ -174,8 +178,11 @@ BOOL isCustomResolution(CGSize res) {
         case 60:
             framerate = 1;
             break;
-        case 120:
+        case 90:
             framerate = 2;
+            break;
+        case 120:
+            framerate = 3;
             break;
     }
 

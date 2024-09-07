@@ -16,7 +16,7 @@ TVOS_DEPLOYMENT_TARGET = 12.0
 
 INFOPLIST_FILE = Moonlight TV/Info.plist
 
-OTHER_LDFLAGS = $(inherited) -lxml2
+OTHER_LDFLAGS = $(inherited) -lxml2 -lopus -lavutil -lavformat -lavcodec -lssl -lcrypto
 
 PRODUCT_NAME = $(TARGET_NAME)
 

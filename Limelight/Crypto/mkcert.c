@@ -67,9 +67,13 @@ struct CertKeyPair generateCertKeyPair(void) {
     X509 *x509 = NULL;
     EVP_PKEY *pkey = NULL;
     PKCS12 *p12 = NULL;
-    // OpenSSL3 has default algorithms that iOS refuses to load so we
-    // must load the legacy provider and override all the algorithms
-    // in this cert.
+    
+    // OpenSSL3 has AES-256-CBC default key encryption algorithm that iOS refuses to load 
+    // so we must load the legacy provider to use `NID_pbe_WithSHA1And3_Key_TripleDES_CBC`
+    // and `NID_pbe_WithSHA1And40BitRC2_CBC` algorithms
+    if (OSSL_PROVIDER_try_load(NULL, "legacy", 1) == NULL) {
+        printf("Failed to load Legacy provider\n");
+    }
     
     bio_err = BIO_new_fp(stderr, BIO_NOCLOSE);
     
@@ -81,8 +85,8 @@ struct CertKeyPair generateCertKeyPair(void) {
                         pkey,
                         x509,
                         NULL,
-                        0,
-                        0,
+                        NID_pbe_WithSHA1And3_Key_TripleDES_CBC,
+                        NID_pbe_WithSHA1And40BitRC2_CBC,
                         2048,
                         -1, // disable the automatic MAC
                         0);

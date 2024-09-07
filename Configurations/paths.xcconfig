@@ -5,13 +5,13 @@
 // Configuration settings file format documentation can be found at:
 // https://help.apple.com/xcode/#/dev745c5c974
 
-LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*] = $(inherited) $(PROJECT_DIR)/libs/opus/lib/iphonesimulator $(PROJECT_DIR)/libs/SDL2/lib/iOS-Sim $(PROJECT_DIR)/libs/FFmpeg/lib/iOS-Sim
-LIBRARY_SEARCH_PATHS[sdk=iphoneos*] = $(inherited) $(PROJECT_DIR)/libs/opus/lib/iphoneos $(PROJECT_DIR)/libs/SDL2/lib/iOS $(PROJECT_DIR)/libs/FFmpeg/lib/iOS
+LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*] = $(inherited) $(PROJECT_DIR)/libs/opus/lib/iphonesimulator $(PROJECT_DIR)/libs/SDL2/lib/iOS-Sim $(PROJECT_DIR)/libs/FFmpeg/lib/iOS-Sim $(PROJECT_DIR)/libs/OpenSSL/iphonesimulator/lib
+LIBRARY_SEARCH_PATHS[sdk=iphoneos*] = $(inherited) $(PROJECT_DIR)/libs/opus/lib/iphoneos $(PROJECT_DIR)/libs/SDL2/lib/iOS $(PROJECT_DIR)/libs/FFmpeg/lib/iOS $(PROJECT_DIR)/libs/OpenSSL/iphoneos/lib
 
-LIBRARY_SEARCH_PATHS[sdk=tvossimulator*] = $(inherited) $(PROJECT_DIR)/libs/opus/lib/tvOS-Sim $(PROJECT_DIR)/libs/FFmpeg/lib/tvOS-Sim
-LIBRARY_SEARCH_PATHS[sdk=tvos*] = $(inherited) $(PROJECT_DIR)/libs/opus/lib/tvOS $(PROJECT_DIR)/libs/FFmpeg/lib/tvOS
+LIBRARY_SEARCH_PATHS[sdk=tvossimulator*] = $(inherited) $(PROJECT_DIR)/libs/opus/lib/tvOS-Sim $(PROJECT_DIR)/libs/FFmpeg/lib/tvOS-Sim $(PROJECT_DIR)/libs/OpenSSL/appletvsimulator/lib
+LIBRARY_SEARCH_PATHS[sdk=tvos*] = $(inherited) $(PROJECT_DIR)/libs/opus/lib/tvOS $(PROJECT_DIR)/libs/FFmpeg/lib/tvOS $(PROJECT_DIR)/libs/OpenSSL/appletvos/lib
 
-LIBRARY_SEARCH_PATHS[sdk=xrsimulator*] = $(inherited) $(PROJECT_DIR)/libs/opus/lib/xrsimulator $(PROJECT_DIR)/libs/FFmpeg/lib/xrsimulator
-LIBRARY_SEARCH_PATHS[sdk=xros*] = $(inherited) $(PROJECT_DIR)/libs/opus/lib/xros $(PROJECT_DIR)/libs/FFmpeg/lib/xros
+LIBRARY_SEARCH_PATHS[sdk=xrsimulator*] = $(inherited) $(PROJECT_DIR)/libs/opus/lib/xrsimulator $(PROJECT_DIR)/libs/FFmpeg/lib/xrsimulator $(PROJECT_DIR)/libs/OpenSSL/visionsimulator/lib
+LIBRARY_SEARCH_PATHS[sdk=xros*] = $(inherited)  $(PROJECT_DIR)/libs/opus/lib/xros $(PROJECT_DIR)/libs/FFmpeg/lib/xros $(PROJECT_DIR)/libs/OpenSSL/visionos/lib
 
 HEADER_SEARCH_PATHS = $(inherited) /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include $(PROJECT_DIR)/moonlight-common/moonlight-common-c/src $(SDKROOT)/usr/include/libxml2/** $(PROJECT_DIR)/libs/**

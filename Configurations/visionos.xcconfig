@@ -51,7 +51,7 @@ SWIFT_OPTIMIZATION_LEVEL[config=Release] = -O
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG $(inherited)
 
 SWIFT_OBJC_INTERFACE_HEADER_NAME = Moonlight-Swift.h
-SWIFT_OBJC_BRIDGING_HEADER = Limelight/Input/Moonlight-Bridging-Header.h
+SWIFT_OBJC_BRIDGING_HEADER = Moonlight Vision/Moonlight-Bridging-Header.h
 
 INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.games
 INFOPLIST_KEY_NSLocalNetworkUsageDescription = Starlight uses the local network to connect to your gaming PC for streaming.

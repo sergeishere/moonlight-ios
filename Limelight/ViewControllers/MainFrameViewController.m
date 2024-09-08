@@ -891,7 +891,7 @@ static NSMutableSet* hostList;
     return nil;
 }
 
-#if !TARGET_OS_TV
+#if !TARGET_OS_TV & !TARGET_OS_VISION
 - (void)revealController:(SWRevealViewController *)revealController didMoveToPosition:(FrontViewPosition)position {
     // If we moved back to the center position, we should save the settings
     if (position == FrontViewPositionLeft) {
@@ -944,7 +944,25 @@ static NSMutableSet* hostList;
 {
     [super viewDidLoad];
         
-#if !TARGET_OS_TV
+#if TARGET_OS_TV
+    
+    // The settings button will direct the user into the Settings app on tvOS
+    [_settingsButton setTarget:self];
+    [_settingsButton setAction:@selector(openTvSettings:)];
+    
+    // Restore focus on the selected app on view controller pop navigation
+    self.restoresFocusAfterTransition = NO;
+    self.collectionView.remembersLastFocusedIndexPath = YES;
+    
+    _menuRecognizer = [[UITapGestureRecognizer alloc] init];
+    [_menuRecognizer addTarget:self action: @selector(showHostSelectionView)];
+    _menuRecognizer.allowedPressTypes = [[NSArray alloc] initWithObjects:[NSNumber numberWithLong:UIPressTypeMenu], nil];
+    
+    self.navigationController.navigationBar.titleTextAttributes = [NSDictionary dictionaryWithObject:[UIColor whiteColor] forKey:NSForegroundColorAttributeName];
+#elif TARGET_OS_VISION
+    [_settingsButton setTarget:self];
+    [_settingsButton setAction:@selector(openVisionSettings:)];
+#else
     // Set the side bar button action. When it's tapped, it'll show the sidebar.
     [_settingsButton setTarget:self.revealViewController];
     [_settingsButton setAction:@selector(revealToggle:)];
@@ -963,20 +981,6 @@ static NSMutableSet* hostList;
     // Disable bounce-back on reveal VC otherwise the settings will snap closed
     // if the user drags all the way off the screen opposite the settings pane.
     self.revealViewController.bounceBackOnOverdraw = NO;
-#else
-    // The settings button will direct the user into the Settings app on tvOS
-    [_settingsButton setTarget:self];
-    [_settingsButton setAction:@selector(openTvSettings:)];
-    
-    // Restore focus on the selected app on view controller pop navigation
-    self.restoresFocusAfterTransition = NO;
-    self.collectionView.remembersLastFocusedIndexPath = YES;
-    
-    _menuRecognizer = [[UITapGestureRecognizer alloc] init];
-    [_menuRecognizer addTarget:self action: @selector(showHostSelectionView)];
-    _menuRecognizer.allowedPressTypes = [[NSArray alloc] initWithObjects:[NSNumber numberWithLong:UIPressTypeMenu], nil];
-    
-    self.navigationController.navigationBar.titleTextAttributes = [NSDictionary dictionaryWithObject:[UIColor whiteColor] forKey:NSForegroundColorAttributeName];
 #endif
     
     _loadingFrame = [self.storyboard instantiateViewControllerWithIdentifier:@"loadingFrame"];
@@ -1049,6 +1053,13 @@ static NSMutableSet* hostList;
 }
 #endif
 
+#if TARGET_OS_VISION
+- (void)openVisionSettings:(id)sender
+{
+    [self performSegueWithIdentifier:@"openSettings" sender:nil];
+}
+#endif
+
 -(void)beginForegroundRefresh
 {
     if (!_background) {
@@ -1117,7 +1128,7 @@ static NSMutableSet* hostList;
 {
     [super viewDidAppear:animated];
     
-#if !TARGET_OS_TV
+#if !TARGET_OS_TV & !TARGET_OS_VISION
     [[self revealViewController] setPrimaryViewController:self];
 #endif
     

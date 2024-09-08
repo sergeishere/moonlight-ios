@@ -50,7 +50,7 @@ static const int bitrateTable[] = {
     150000,
 };
 
-const int RESOLUTION_TABLE_SIZE = 7;
+const int RESOLUTION_TABLE_SIZE = 8;
 const int RESOLUTION_TABLE_CUSTOM_INDEX = RESOLUTION_TABLE_SIZE - 1;
 CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
 
@@ -100,14 +100,12 @@ CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
 - (void)viewSafeAreaInsetsDidChange {
     [super viewSafeAreaInsetsDidChange];
     
-    if (@available(iOS 11.0, *)) {
-        for (UIView* view in self.view.subviews) {
-            // HACK: The official safe area is much too large for our purposes
-            // so we'll just use the presence of any safe area to indicate we should
-            // pad by 20.
-            if (self.view.safeAreaInsets.left >= 20 || self.view.safeAreaInsets.right >= 20) {
-                view.frame = CGRectMake(view.frame.origin.x + 20, view.frame.origin.y, view.frame.size.width, view.frame.size.height);
-            }
+    for (UIView* view in self.view.subviews) {
+        // HACK: The official safe area is much too large for our purposes
+        // so we'll just use the presence of any safe area to indicate we should
+        // pad by 20.
+        if (self.view.safeAreaInsets.left >= 20 || self.view.safeAreaInsets.right >= 20) {
+            view.frame = CGRectMake(view.frame.origin.x + 20, view.frame.origin.y, view.frame.size.width, view.frame.size.height);
         }
     }
 }
@@ -159,14 +157,15 @@ BOOL isCustomResolution(CGSize res) {
     resolutionTable[0] = CGSizeMake(640, 360);
     resolutionTable[1] = CGSizeMake(1280, 720);
     resolutionTable[2] = CGSizeMake(1920, 1080);
-    resolutionTable[3] = CGSizeMake(3840, 2160);
-    resolutionTable[4] = CGSizeMake(safeAreaWidth, fullScreenHeight);
-    resolutionTable[5] = CGSizeMake(fullScreenWidth, fullScreenHeight);
-    resolutionTable[6] = CGSizeMake([currentSettings.width integerValue], [currentSettings.height integerValue]); // custom initial value
+    resolutionTable[3] = CGSizeMake(2560, 1440);
+    resolutionTable[4] = CGSizeMake(3840, 2160);
+    resolutionTable[5] = CGSizeMake(safeAreaWidth, fullScreenHeight);
+    resolutionTable[6] = CGSizeMake(fullScreenWidth, fullScreenHeight);
+    resolutionTable[7] = CGSizeMake([currentSettings.width integerValue], [currentSettings.height integerValue]); // custom initial value
     
     // Don't populate the custom entry unless we have a custom resolution
-    if (!isCustomResolution(resolutionTable[6])) {
-        resolutionTable[6] = CGSizeMake(0, 0);
+    if (!isCustomResolution(resolutionTable[7])) {
+        resolutionTable[7] = CGSizeMake(0, 0);
     }
     
     NSInteger framerate;
@@ -195,18 +194,18 @@ BOOL isCustomResolution(CGSize res) {
         }
     }
 
-    // Only show the 120 FPS option if we have a > 60-ish Hz display
+    // Only show the 90 and 120 FPS option if we have a > 60-ish Hz display
 #if TARGET_OS_VISION
     [self.framerateSelector removeSegmentAtIndex:3 animated:NO];
 #else
-    bool enable120Fps = false;
-    if (@available(iOS 10.3, tvOS 10.3, *)) {
-
-        if ([UIScreen mainScreen].maximumFramesPerSecond > 62) {
-            enable120Fps = true;
-        }
+    bool enableHighFPS = false;
+    
+    if ([UIScreen mainScreen].maximumFramesPerSecond > 62) {
+        enableHighFPS = true;
     }
-    if (!enable120Fps) {
+    
+    if (!enableHighFPS) {
+        [self.framerateSelector removeSegmentAtIndex:3 animated:NO];
         [self.framerateSelector removeSegmentAtIndex:3 animated:NO];
     }
 #endif

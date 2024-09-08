@@ -1636,17 +1636,9 @@ const int FrontViewPositionNone = 0xff;
     controllerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     controllerView.frame = frame;
     
-#if !TARGET_OS_VISION
-    if ( [controllerView isKindOfClass:[UIScrollView class]] )
-    {
-        BOOL adjust = controller.automaticallyAdjustsScrollViewInsets;
-        
-        if ( adjust )
-        {
-            [(id)controllerView setContentInset:UIEdgeInsetsMake(statusBarAdjustment(_contentView), 0, 0, 0)];
-        }
+    if ( [controllerView isKindOfClass:[UIScrollView class]] ) {
+        ((UIScrollView*)controllerView).contentInsetAdjustmentBehavior =  UIScrollViewContentInsetAdjustmentAutomatic;
     }
-#endif
     
     [view addSubview:controllerView];
     

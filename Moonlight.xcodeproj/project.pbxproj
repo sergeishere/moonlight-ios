@@ -8,12 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		693B3A9B218638CD00982F7B /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 693B3A9A218638CD00982F7B /* Settings.bundle */; };
-		9507E43B2C8A649400AC5E17 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9507E43A2C8A649400AC5E17 /* main.m */; };
 		953F2C6F2C89FBDB002771B0 /* SDL3.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95D5B13A2C89B5B80015818C /* SDL3.xcframework */; };
 		953F2C702C89FBDB002771B0 /* SDL3.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 95D5B13A2C89B5B80015818C /* SDL3.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		953F2C7B2C8A63E6002771B0 /* RealityKitContent in Frameworks */ = {isa = PBXBuildFile; productRef = 953F2C7A2C8A63E6002771B0 /* RealityKitContent */; };
 		953F2C7D2C8A63E6002771B0 /* Moonlight_VisionApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953F2C7C2C8A63E6002771B0 /* Moonlight_VisionApp.swift */; };
-		953F2C7F2C8A63E6002771B0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953F2C7E2C8A63E6002771B0 /* ContentView.swift */; };
+		953F2C7F2C8A63E6002771B0 /* HostsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953F2C7E2C8A63E6002771B0 /* HostsView.swift */; };
 		953F2C812C8A63E7002771B0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 953F2C802C8A63E7002771B0 /* Assets.xcassets */; };
 		953F2C842C8A63E7002771B0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 953F2C832C8A63E7002771B0 /* Preview Assets.xcassets */; };
 		953F2C892C8A642C002771B0 /* IdManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FB53E1421BE5DC4400CD6ECE /* IdManager.m */; };
@@ -61,16 +59,15 @@
 		956419582C8A668A009C0472 /* SDL3.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95D5B13A2C89B5B80015818C /* SDL3.xcframework */; };
 		956419592C8A668A009C0472 /* SDL3.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 95D5B13A2C89B5B80015818C /* SDL3.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9564195D2C8A6697009C0472 /* libmoonlight-common-vision.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 95D5ADF82C88E4D70015818C /* libmoonlight-common-vision.a */; };
-		9564195E2C8A670E009C0472 /* Limelight.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FB290D0519B2C406004C83CF /* Limelight.xcdatamodeld */; };
 		9564195F2C8A6728009C0472 /* X1Kit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9896219623D15C7000211983 /* X1Kit.swift */; };
 		956419602C8A6752009C0472 /* AbsoluteTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 9819CC21254F180F008A7C8E /* AbsoluteTouchHandler.m */; };
 		956419662C8A69CA009C0472 /* mkcert.c in Sources */ = {isa = PBXBuildFile; fileRef = FB89460719F646E200339C8A /* mkcert.c */; };
-		956419682C8A6A8A009C0472 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 956419672C8A6A28009C0472 /* Main.storyboard */; };
-		956419692C8A6AEA009C0472 /* SWRevealViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FBD3495219FF36FB002D2A60 /* SWRevealViewController.m */; };
 		9564196C2C8B741E009C0472 /* SDL3.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95D5B13A2C89B5B80015818C /* SDL3.xcframework */; };
 		9564196D2C8B741E009C0472 /* SDL3.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 95D5B13A2C89B5B80015818C /* SDL3.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9564196F2C8B9925009C0472 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FB290D0819B2C406004C83CF /* Images.xcassets */; };
 		956419702C8BA058009C0472 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FBD3494F19FF2174002D2A60 /* SettingsViewController.m */; };
+		95E4BBDE2C8E2A1E00072B10 /* Limelight.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FB290D0519B2C406004C83CF /* Limelight.xcdatamodeld */; };
+		95E4BBE02C8E3B6700072B10 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 95E4BBDF2C8E3B6700072B10 /* Main.storyboard */; };
 		9819CC14254F107A008A7C8E /* RelativeTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 9819CC13254F107A008A7C8E /* RelativeTouchHandler.m */; };
 		9819CC1D254F1730008A7C8E /* RelativeTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 9819CC13254F107A008A7C8E /* RelativeTouchHandler.m */; };
 		9819CC22254F180F008A7C8E /* AbsoluteTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 9819CC21254F180F008A7C8E /* AbsoluteTouchHandler.m */; };
@@ -255,17 +252,15 @@
 /* Begin PBXFileReference section */
 		566E9D2B2770B23A00EF7BFE /* Moonlight v1.7.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.7.xcdatamodel"; sourceTree = "<group>"; };
 		693B3A9A218638CD00982F7B /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
-		9507E43A2C8A649400AC5E17 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		9507E43C2C8A650400AC5E17 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		953F2C722C8A3A6D002771B0 /* CoreAudioTypes.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioTypes.framework; path = Platforms/XROS.platform/Developer/SDKs/XROS1.2.sdk/System/Library/Frameworks/CoreAudioTypes.framework; sourceTree = DEVELOPER_DIR; };
 		953F2C782C8A63E6002771B0 /* Moonlight Vision.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Moonlight Vision.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		953F2C7C2C8A63E6002771B0 /* Moonlight_VisionApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Moonlight_VisionApp.swift; sourceTree = "<group>"; };
-		953F2C7E2C8A63E6002771B0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		953F2C7E2C8A63E6002771B0 /* HostsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostsView.swift; sourceTree = "<group>"; };
 		953F2C802C8A63E7002771B0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		953F2C832C8A63E7002771B0 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		956419622C8A678C009C0472 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = Platforms/XROS.platform/Developer/SDKs/XROS1.2.sdk/System/Library/Frameworks/CoreAudio.framework; sourceTree = DEVELOPER_DIR; };
 		956419632C8A678C009C0472 /* CoreAudioKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = Platforms/XROS.platform/Developer/SDKs/XROS1.2.sdk/System/Library/Frameworks/CoreAudioKit.framework; sourceTree = DEVELOPER_DIR; };
-		956419672C8A6A28009C0472 /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		9569B7CB2C87BF47009C3BE6 /* ios.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = ios.xcconfig; sourceTree = "<group>"; };
 		9569B7CC2C87BF47009C3BE6 /* credentials.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = credentials.xcconfig; sourceTree = "<group>"; };
 		9569B7D12C87BF54009C3BE6 /* tvos.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = tvos.xcconfig; sourceTree = "<group>"; };
@@ -279,6 +274,8 @@
 		95D5ADC92C88E42A0015818C /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/XROS.platform/Developer/SDKs/XROS1.2.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 		95D5ADFA2C88E4E60015818C /* visionos.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = visionos.xcconfig; sourceTree = "<group>"; };
 		95D5B13A2C89B5B80015818C /* SDL3.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = SDL3.xcframework; path = libs/SDL3.xcframework; sourceTree = "<group>"; };
+		95E4BBDF2C8E3B6700072B10 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		95E4BBE32C8E49AA00072B10 /* Moonlight-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Moonlight-Bridging-Header.h"; sourceTree = "<group>"; };
 		9803CCAB254F9EAF00EE185E /* ConnectionCallbacks.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConnectionCallbacks.h; sourceTree = "<group>"; };
 		98132E8C20BC9A62007A053F /* Moonlight v1.1.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.1.xcdatamodel"; sourceTree = "<group>"; };
 		98181BE82791275D00E43572 /* libSDL2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL2.a; path = libs/SDL2/lib/iOS/libSDL2.a; sourceTree = "<group>"; };
@@ -434,7 +431,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				953F2C7B2C8A63E6002771B0 /* RealityKitContent in Frameworks */,
 				9564195D2C8A6697009C0472 /* libmoonlight-common-vision.a in Frameworks */,
 				956419582C8A668A009C0472 /* SDL3.xcframework in Frameworks */,
 			);
@@ -464,11 +460,11 @@
 		953F2C792C8A63E6002771B0 /* Moonlight Vision */ = {
 			isa = PBXGroup;
 			children = (
-				956419672C8A6A28009C0472 /* Main.storyboard */,
+				95E4BBE32C8E49AA00072B10 /* Moonlight-Bridging-Header.h */,
+				95E4BBDF2C8E3B6700072B10 /* Main.storyboard */,
 				9507E43C2C8A650400AC5E17 /* Info.plist */,
-				9507E43A2C8A649400AC5E17 /* main.m */,
 				953F2C7C2C8A63E6002771B0 /* Moonlight_VisionApp.swift */,
-				953F2C7E2C8A63E6002771B0 /* ContentView.swift */,
+				953F2C7E2C8A63E6002771B0 /* HostsView.swift */,
 				953F2C802C8A63E7002771B0 /* Assets.xcassets */,
 				953F2C822C8A63E7002771B0 /* Preview Content */,
 			);
@@ -856,7 +852,6 @@
 			);
 			name = "Moonlight Vision";
 			packageProductDependencies = (
-				953F2C7A2C8A63E6002771B0 /* RealityKitContent */,
 			);
 			productName = "Moonlight Vision";
 			productReference = 953F2C782C8A63E6002771B0 /* Moonlight Vision.app */;
@@ -990,10 +985,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				956419682C8A6A8A009C0472 /* Main.storyboard in Resources */,
 				9564196F2C8B9925009C0472 /* Images.xcassets in Resources */,
 				953F2C842C8A63E7002771B0 /* Preview Assets.xcassets in Resources */,
 				953F2C812C8A63E7002771B0 /* Assets.xcassets in Resources */,
+				95E4BBE02C8E3B6700072B10 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1027,9 +1022,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				953F2C7F2C8A63E6002771B0 /* ContentView.swift in Sources */,
+				953F2C7F2C8A63E6002771B0 /* HostsView.swift in Sources */,
 				956419602C8A6752009C0472 /* AbsoluteTouchHandler.m in Sources */,
-				9564195E2C8A670E009C0472 /* Limelight.xcdatamodeld in Sources */,
 				953F2C7D2C8A63E6002771B0 /* Moonlight_VisionApp.swift in Sources */,
 				953F2C8B2C8A6434002771B0 /* StreamView.m in Sources */,
 				953F2C8C2C8A6434002771B0 /* KeyboardInputField.m in Sources */,
@@ -1039,6 +1033,7 @@
 				956419702C8BA058009C0472 /* SettingsViewController.m in Sources */,
 				953F2CA32C8A644B002771B0 /* StreamConfiguration.m in Sources */,
 				9564195F2C8A6728009C0472 /* X1Kit.swift in Sources */,
+				95E4BBDE2C8E2A1E00072B10 /* Limelight.xcdatamodeld in Sources */,
 				953F2CA42C8A644B002771B0 /* StreamManager.m in Sources */,
 				953F2C9A2C8A643E002771B0 /* MDNSManager.m in Sources */,
 				953F2C9B2C8A643E002771B0 /* DiscoveryWorker.m in Sources */,
@@ -1056,7 +1051,6 @@
 				953F2CAF2C8A6465002771B0 /* AppDelegate.m in Sources */,
 				953F2CB02C8A6465002771B0 /* AppCollectionView.m in Sources */,
 				953F2CB12C8A6465002771B0 /* UIComputerView.m in Sources */,
-				9507E43B2C8A649400AC5E17 /* main.m in Sources */,
 				953F2CB22C8A6465002771B0 /* UIAppView.m in Sources */,
 				953F2C972C8A643A002771B0 /* HttpRequest.m in Sources */,
 				953F2CA72C8A6459002771B0 /* MainFrameViewController.m in Sources */,
@@ -1065,7 +1059,6 @@
 				953F2C982C8A643A002771B0 /* AppAssetResponse.m in Sources */,
 				953F2C912C8A6434002771B0 /* KeyboardSupport.m in Sources */,
 				953F2C922C8A6434002771B0 /* OnScreenControls.m in Sources */,
-				956419692C8A6AEA009C0472 /* SWRevealViewController.m in Sources */,
 				953F2C9C2C8A6441002771B0 /* AppAssetManager.m in Sources */,
 				953F2C9E2C8A6445002771B0 /* PairManager.m in Sources */,
 				953F2C9F2C8A6445002771B0 /* ConnectionHelper.m in Sources */,
@@ -1418,13 +1411,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		953F2C7A2C8A63E6002771B0 /* RealityKitContent */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = RealityKitContent;
-		};
-/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		FB290D0519B2C406004C83CF /* Limelight.xcdatamodeld */ = {

@@ -1,5 +1,5 @@
 //
-//  Moonlight_VisionApp.swift
+//  HostsView.swift
 //  Moonlight Vision
 //
 //  Created by Сергей Дмитриев on 06.09.2024.
@@ -8,16 +8,15 @@
 
 import SwiftUI
 
-@main
-struct Moonlight_VisionApp: App {
-    
-    init() {
-        SDL_SetMainReady()
-    }
-    
-    var body: some Scene {
-        WindowGroup {
-            HostsView()
+struct HostsView: View {
+    var body: some View {
+        VStack {
+            Text("Hello, world!")
         }
+        .padding()
     }
+}
+
+#Preview(windowStyle: .automatic) {
+    HostsView()
 }

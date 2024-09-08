@@ -71,7 +71,6 @@
 		9564196D2C8B741E009C0472 /* SDL3.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 95D5B13A2C89B5B80015818C /* SDL3.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9564196F2C8B9925009C0472 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FB290D0819B2C406004C83CF /* Images.xcassets */; };
 		956419702C8BA058009C0472 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FBD3494F19FF2174002D2A60 /* SettingsViewController.m */; };
-		98181BED2791281100E43572 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BEC2791281100E43572 /* CoreMotion.framework */; };
 		9819CC14254F107A008A7C8E /* RelativeTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 9819CC13254F107A008A7C8E /* RelativeTouchHandler.m */; };
 		9819CC1D254F1730008A7C8E /* RelativeTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 9819CC13254F107A008A7C8E /* RelativeTouchHandler.m */; };
 		9819CC22254F180F008A7C8E /* AbsoluteTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 9819CC21254F180F008A7C8E /* AbsoluteTouchHandler.m */; };
@@ -83,7 +82,6 @@
 		9865DC36213287F30005B9B9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FB290D0319B2C406004C83CF /* AppDelegate.m */; };
 		9865DC37213287FE0005B9B9 /* StreamFrameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FB89462719F646E200339C8A /* StreamFrameViewController.m */; };
 		9865DC38213287FE0005B9B9 /* LoadingFrameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FB4A23B71A9D3637004D2EF2 /* LoadingFrameViewController.m */; };
-		9865DC3C2132922E0005B9B9 /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9865DC3B2132922E0005B9B9 /* GameController.framework */; };
 		9865DC3E21332D660005B9B9 /* MainFrameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FB89462519F646E200339C8A /* MainFrameViewController.m */; };
 		988FCD41293B091B003050E2 /* KeyboardInputField.m in Sources */ = {isa = PBXBuildFile; fileRef = 988FCD40293B091B003050E2 /* KeyboardInputField.m */; };
 		988FCD42293B091B003050E2 /* KeyboardInputField.m in Sources */ = {isa = PBXBuildFile; fileRef = 988FCD40293B091B003050E2 /* KeyboardInputField.m */; };
@@ -91,7 +89,6 @@
 		9896219A23D56E8100211983 /* X1Kit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9896219623D15C7000211983 /* X1Kit.swift */; };
 		9897B6A1221260EF00966419 /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = 9897B6A0221260EF00966419 /* Controller.m */; };
 		9897B6A62212732C00966419 /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = 9897B6A0221260EF00966419 /* Controller.m */; };
-		98B9CE6D27B2144B00B473C4 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98B9CE6C27B2144B00B473C4 /* AVKit.framework */; };
 		98CFB82F1CAD481B0048EF74 /* libmoonlight-common.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98AB2E841CAD46840089BB98 /* libmoonlight-common.a */; };
 		98D5856D1C0EA79600F6CC00 /* TemporaryHost.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856C1C0EA79600F6CC00 /* TemporaryHost.m */; };
 		98D585701C0ED0E800F6CC00 /* TemporarySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */; };
@@ -131,7 +128,6 @@
 		FB1A67DE2132460A00507771 /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = FB89462219F646E200339C8A /* Utils.m */; };
 		FB1A67E02132460A00507771 /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = FBD1C8E11A8AD71400C6703C /* Logger.m */; };
 		FB1A67E32132498A00507771 /* Limelight.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FB290D0519B2C406004C83CF /* Limelight.xcdatamodeld */; };
-		FB1A67E521324A1F00507771 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB1A67E421324A1F00507771 /* CoreData.framework */; };
 		FB1A6819213284FB00507771 /* UIComputerView.m in Sources */ = {isa = PBXBuildFile; fileRef = FBDE86DF19F7A837001C18A8 /* UIComputerView.m */; };
 		FB1A681A213284FB00507771 /* UIAppView.m in Sources */ = {isa = PBXBuildFile; fileRef = FBDE86E519F82297001C18A8 /* UIAppView.m */; };
 		FB1A681B213284FB00507771 /* ComputerScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = FB1D59961BBCCB6400F482CA /* ComputerScrollView.m */; };
@@ -139,10 +135,6 @@
 		FB1A681E21328A1B00507771 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FB290D0819B2C406004C83CF /* Images.xcassets */; };
 		FB1D59971BBCCB6400F482CA /* ComputerScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = FB1D59961BBCCB6400F482CA /* ComputerScrollView.m */; };
 		FB1D599A1BBCCD7E00F482CA /* AppCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = FB1D59991BBCCD7E00F482CA /* AppCollectionView.m */; };
-		FB290CF219B2C406004C83CF /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB290CF119B2C406004C83CF /* Foundation.framework */; };
-		FB290CF419B2C406004C83CF /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB290CF319B2C406004C83CF /* CoreGraphics.framework */; };
-		FB290CF619B2C406004C83CF /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB290CF519B2C406004C83CF /* UIKit.framework */; };
-		FB290CF819B2C406004C83CF /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB290CF719B2C406004C83CF /* CoreData.framework */; };
 		FB290CFE19B2C406004C83CF /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = FB290CFC19B2C406004C83CF /* InfoPlist.strings */; };
 		FB290D0019B2C406004C83CF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FB290CFF19B2C406004C83CF /* main.m */; };
 		FB290D0419B2C406004C83CF /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FB290D0319B2C406004C83CF /* AppDelegate.m */; };
@@ -153,7 +145,6 @@
 		FB4678ED1A50C40900377732 /* OnScreenControls.m in Sources */ = {isa = PBXBuildFile; fileRef = FB4678EC1A50C40900377732 /* OnScreenControls.m */; };
 		FB4678FA1A55FFAD00377732 /* DiscoveryManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FB4678F91A55FFAD00377732 /* DiscoveryManager.m */; };
 		FB4678FF1A565DAC00377732 /* WakeOnLanManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FB4678FE1A565DAC00377732 /* WakeOnLanManager.m */; };
-		FB4679011A57048000377732 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB4679001A57048000377732 /* CoreFoundation.framework */; };
 		FB4A23B81A9D3637004D2EF2 /* LoadingFrameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FB4A23B71A9D3637004D2EF2 /* LoadingFrameViewController.m */; };
 		FB53E1431BE5DC4400CD6ECE /* IdManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FB53E1421BE5DC4400CD6ECE /* IdManager.m */; };
 		FB6549561A57907E001C8F39 /* DiscoveryWorker.m in Sources */ = {isa = PBXBuildFile; fileRef = FB6549551A57907E001C8F39 /* DiscoveryWorker.m */; };
@@ -455,9 +446,6 @@
 			files = (
 				9865DC30213260B40005B9B9 /* libmoonlight-common-tv.a in Frameworks */,
 				9564196C2C8B741E009C0472 /* SDL3.xcframework in Frameworks */,
-				9865DC3C2132922E0005B9B9 /* GameController.framework in Frameworks */,
-				FB1A67E521324A1F00507771 /* CoreData.framework in Frameworks */,
-				98B9CE6D27B2144B00B473C4 /* AVKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -466,13 +454,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				98CFB82F1CAD481B0048EF74 /* libmoonlight-common.a in Frameworks */,
-				FB290CF419B2C406004C83CF /* CoreGraphics.framework in Frameworks */,
-				FB290CF819B2C406004C83CF /* CoreData.framework in Frameworks */,
-				98181BED2791281100E43572 /* CoreMotion.framework in Frameworks */,
 				953F2C6F2C89FBDB002771B0 /* SDL3.xcframework in Frameworks */,
-				FB290CF619B2C406004C83CF /* UIKit.framework in Frameworks */,
-				FB290CF219B2C406004C83CF /* Foundation.framework in Frameworks */,
-				FB4679011A57048000377732 /* CoreFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

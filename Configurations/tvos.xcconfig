@@ -11,7 +11,8 @@ DEVELOPMENT_TEAM = DM46QST4M7
 DEBUG_INFORMATION_FORMAT[config=Debug] = dwarf
 DEBUG_INFORMATION_FORMAT[config=Release] = dwarf-with-dsym
 
-SUPPORTED_PLATFORMS = tvos tvossimulator
+SDKROOT = appletvos
+SUPPORTED_PLATFORMS = appletvos appletvsimulator
 TVOS_DEPLOYMENT_TARGET = 12.0
 
 INFOPLIST_FILE = Moonlight TV/Info.plist

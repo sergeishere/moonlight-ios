@@ -143,7 +143,7 @@ BOOL isCustomResolution(CGSize res) {
     // Get the size of the screen with and without safe area insets
     UIWindow *window = UIApplication.sharedApplication.windows.firstObject;
 #if TARGET_OS_VISION
-    CGFloat screenScale = 3.0;
+    CGFloat screenScale = 1.0;
 #else
     CGFloat screenScale = window.screen.scale;
 #endif

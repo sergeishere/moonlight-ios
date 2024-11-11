@@ -9,7 +9,7 @@
 #define SDL_MAIN_HANDLED
 #import "SDLMainWrapper.h"
 
-#import <SDL.h>
+#import <SDL3/SDL_main.h>
 
 @implementation SDLMainWrapper
 

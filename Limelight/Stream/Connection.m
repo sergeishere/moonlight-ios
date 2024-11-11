@@ -12,7 +12,7 @@
 #import <VideoToolbox/VideoToolbox.h>
 
 #define SDL_MAIN_HANDLED
-#import <SDL.h>
+#import <SDL3/SDL.h>
 
 #include "Limelight.h"
 #include "opus_multistream.h"
@@ -38,7 +38,7 @@ static video_stats_t currentVideoStats;
 static video_stats_t lastVideoStats;
 static NSLock* videoStatsLock;
 
-static SDL_AudioDeviceID audioDevice;
+static SDL_AudioStream *audioStream;
 static OPUS_MULTISTREAM_CONFIGURATION audioConfig;
 static void* audioBuffer;
 static int audioFrameSize;
@@ -190,22 +190,22 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
 int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, void* context, int flags)
 {
     int err;
-    SDL_AudioSpec want, have;
+    SDL_AudioSpec want;
     
-    if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0) {
+    if (SDL_InitSubSystem(SDL_INIT_AUDIO) != SDL_TRUE) {
         Log(LOG_E, @"Failed to initialize audio subsystem: %s\n", SDL_GetError());
         return -1;
     }
         
     SDL_zero(want);
     want.freq = opusConfig->sampleRate;
-    want.format = AUDIO_S16;
+    want.format = SDL_AUDIO_S16LE;
     want.channels = opusConfig->channelCount;
-    want.samples = opusConfig->samplesPerFrame;
+//    want.samples = opusConfig->samplesPerFrame;
 
-    audioDevice = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
-    if (audioDevice == 0) {
-        Log(LOG_E, @"Failed to open audio device: %s\n", SDL_GetError());
+    audioStream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &want, NULL, NULL);
+    if (audioStream == 0) {
+        Log(LOG_E, @"Failed to open audio stream: %s\n", SDL_GetError());
         ArCleanup();
         return -1;
     }
@@ -231,8 +231,7 @@ int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, v
         return -1;
     }
     
-    // Start playback
-    SDL_PauseAudioDevice(audioDevice, 0);
+    SDL_ResumeAudioStreamDevice(audioStream);
     
     // Disable ducking so other audio sources aren't quiet.
     NSError* categoryErr;
@@ -252,9 +251,10 @@ void ArCleanup(void)
         opusDecoder = NULL;
     }
     
-    if (audioDevice != 0) {
-        SDL_CloseAudioDevice(audioDevice);
-        audioDevice = 0;
+    if (audioStream != 0) {
+        SDL_PauseAudioStreamDevice(audioStream);
+        SDL_ClearAudioStream(audioStream);
+        audioStream = 0;
     }
     
     if (audioBuffer != NULL) {
@@ -280,13 +280,11 @@ void ArDecodeAndPlaySample(char* sampleData, int sampleLength)
     if (decodeLen > 0) {
         // Provide backpressure on the queue to ensure too many frames don't build up
         // in SDL's audio queue.
-        while (SDL_GetQueuedAudioSize(audioDevice) / audioFrameSize > 10) {
+        while (SDL_GetAudioStreamQueued(audioStream) / audioFrameSize > 10) {
             SDL_Delay(1);
         }
         
-        if (SDL_QueueAudio(audioDevice,
-                           audioBuffer,
-                           sizeof(short) * decodeLen * audioConfig.channelCount) < 0) {
+        if (SDL_PutAudioStreamData(audioStream, audioBuffer, sizeof(short) * decodeLen * audioConfig.channelCount) != SDL_TRUE) {
             Log(LOG_E, @"Failed to queue audio sample: %s\n", SDL_GetError());
         }
     }

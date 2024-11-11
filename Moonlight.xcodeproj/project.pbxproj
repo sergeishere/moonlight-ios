@@ -10,6 +10,8 @@
 		693B3A9B218638CD00982F7B /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 693B3A9A218638CD00982F7B /* Settings.bundle */; };
 		950D86602CCFCC7500683A19 /* StreamViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 950D865F2CCFCC7100683A19 /* StreamViewModel.swift */; };
 		957506532CD4004200F28793 /* CurvedScreenBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 957506522CD4003E00F28793 /* CurvedScreenBuilder.swift */; };
+		959462792CE2A7CA008FFC1D /* SDL3.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95CC40162CDC160800FC5858 /* SDL3.xcframework */; };
+		9594627A2CE2A7CA008FFC1D /* SDL3.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 95CC40162CDC160800FC5858 /* SDL3.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		98181BE92791277400E43572 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BE82791275D00E43572 /* libSDL2.a */; };
 		98181BEB2791278F00E43572 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BEA2791278300E43572 /* libSDL2.a */; };
 		98181BED2791281100E43572 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BEC2791281100E43572 /* CoreMotion.framework */; };
@@ -108,7 +110,6 @@
 		F7A119462B5DDF73001E8686 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98882A052AF60F5300C5A11C /* libavformat.a */; };
 		F7A119482B5DDF73001E8686 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB290CF119B2C406004C83CF /* Foundation.framework */; };
 		F7A119492B5DDF73001E8686 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB4679001A57048000377732 /* CoreFoundation.framework */; };
-		F7A1194A2B5DDF73001E8686 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BE82791275D00E43572 /* libSDL2.a */; };
 		F7A1194B2B5DDF73001E8686 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98882A032AF60F5300C5A11C /* libavcodec.a */; };
 		F7A1194E2B5DDF73001E8686 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = FB290CFC19B2C406004C83CF /* InfoPlist.strings */; };
 		F7A119502B5DDF73001E8686 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FB290D0819B2C406004C83CF /* Images.xcassets */; };
@@ -253,12 +254,27 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		9594627B2CE2A7CA008FFC1D /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				9594627A2CE2A7CA008FFC1D /* SDL3.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		566E9D2B2770B23A00EF7BFE /* Moonlight v1.7.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.7.xcdatamodel"; sourceTree = "<group>"; };
 		693B3A9A218638CD00982F7B /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		950D865F2CCFCC7100683A19 /* StreamViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamViewModel.swift; sourceTree = "<group>"; };
 		950D86632CD00A2600683A19 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		957506522CD4003E00F28793 /* CurvedScreenBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurvedScreenBuilder.swift; sourceTree = "<group>"; };
+		95CC40162CDC160800FC5858 /* SDL3.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = SDL3.xcframework; path = libs/SDL3.xcframework; sourceTree = "<group>"; };
 		9803CCAB254F9EAF00EE185E /* ConnectionCallbacks.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConnectionCallbacks.h; sourceTree = "<group>"; };
 		98132E8C20BC9A62007A053F /* Moonlight v1.1.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.1.xcdatamodel"; sourceTree = "<group>"; };
 		98181BE82791275D00E43572 /* libSDL2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL2.a; path = libs/SDL2/lib/iOS/libSDL2.a; sourceTree = "<group>"; };
@@ -518,8 +534,8 @@
 				F7A119F72B5DE725001E8686 /* libopus.a in Frameworks */,
 				F72DD4D62BEEB16A0003CD8A /* OpenSSL in Frameworks */,
 				F7A119482B5DDF73001E8686 /* Foundation.framework in Frameworks */,
+				959462792CE2A7CA008FFC1D /* SDL3.xcframework in Frameworks */,
 				F7A119492B5DDF73001E8686 /* CoreFoundation.framework in Frameworks */,
-				F7A1194A2B5DDF73001E8686 /* libSDL2.a in Frameworks */,
 				F7A1194B2B5DDF73001E8686 /* libavcodec.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -683,6 +699,7 @@
 		FB290CF019B2C406004C83CF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				95CC40162CDC160800FC5858 /* SDL3.xcframework */,
 				F7A11A1F2B5DF46B001E8686 /* RealityKit.framework */,
 				F7A11A1D2B5DF457001E8686 /* UIKit.framework */,
 				98882A032AF60F5300C5A11C /* libavcodec.a */,
@@ -1056,6 +1073,7 @@
 				F7A1190B2B5DDF73001E8686 /* Sources */,
 				F7A1193D2B5DDF73001E8686 /* Frameworks */,
 				F7A1194C2B5DDF73001E8686 /* Resources */,
+				9594627B2CE2A7CA008FFC1D /* Embed Frameworks */,
 			);
 			buildRules = (
 			);

@@ -16,11 +16,25 @@ struct StreamView: View {
     var screenCurvature: Float = 1.8
     
     @State private var dimPassthrough: Bool = false
+    @State private var curvedScreenEntity: ModelEntity = ModelEntity()
     
     @Namespace var hoverNameSpace
     var hoverGroup: HoverEffectGroup {
         HoverEffectGroup(hoverNameSpace)
     }
+    
+    @State private var isDragging = false
+    
+//    var drag: some Gesture {
+//        DragGesture()
+//            .onChanged { i in
+//
+//                self.isDragging = true
+//            }
+//            .onEnded {
+//                _ in self.isDragging = false
+//            }
+//    }
     
     var body: some View {
         GeometryReader3D { proxy in
@@ -31,34 +45,31 @@ struct StreamView: View {
                             let convertedSize = content.convert(proxy.frame(in: .local), from: .local, to: .scene)
                             let meshResource = try mainModel.curvedScreenBuilder.build(extents: convertedSize.extents, radius: screenCurvature)
                             
-                            let entity = ModelEntity(
+                            curvedScreenEntity = ModelEntity(
                                 mesh: meshResource,
                                 materials: [ mainModel.videoMaterial ]
                             )
-                            entity.name = "CurvedScreen"
+                            curvedScreenEntity.name = "CurvedScreen"
                             
-                            entity.components.set(InputTargetComponent())
-                            entity.components.set(
+                            curvedScreenEntity.components.set(InputTargetComponent())
+                            curvedScreenEntity.components.set(
                                 CollisionComponent(
                                     shapes: [],
                                     filter: CollisionFilter(group: [], mask: [])
                                 )
                             )
                             
-                            content.add(entity)
+                            content.add(curvedScreenEntity)
                             
                             Task(priority: .background) {
                                 let shapeResource = try await ShapeResource.generateStaticMesh(from: meshResource)
-                                entity.collision?.shapes = [shapeResource]
+                                curvedScreenEntity.collision?.shapes = [shapeResource]
                             }
                         } catch {
                             print(error.localizedDescription)
                         }
                     }
                 } update: { content in
-                    guard let modelEntity = content.entities.first(where: { $0.name == "CurvedScreen" }) as? ModelEntity
-                    else { return }
-                    
                     do {
                         let convertedSize = content.convert(
                             proxy.frame(in: .local),
@@ -71,16 +82,44 @@ struct StreamView: View {
                             radius: screenCurvature
                         )
                         
-                        modelEntity.model?.mesh = meshResource
+                        curvedScreenEntity.model?.mesh = meshResource
                         Task(priority: .background) {
                             let shapeResource = try await ShapeResource.generateStaticMesh(from: meshResource)
-                            modelEntity.collision?.shapes = [shapeResource]
+                            curvedScreenEntity.collision?.shapes = [shapeResource]
                         }
                     } catch {
                         print(error.localizedDescription)
                     }
                 }
                 .handlesGameControllerEvents(matching: .gamepad)
+                .onTapGesture {
+                    LiSendMouseButtonEvent(CChar(BUTTON_ACTION_PRESS), BUTTON_LEFT)
+                    LiSendMouseButtonEvent(CChar(BUTTON_ACTION_RELEASE), BUTTON_LEFT)
+                }
+                .onLongPressGesture(minimumDuration: 0.3) {
+                    LiSendMouseButtonEvent(CChar(BUTTON_ACTION_PRESS), BUTTON_RIGHT)
+                    LiSendMouseButtonEvent(CChar(BUTTON_ACTION_RELEASE), BUTTON_RIGHT)
+                }
+                .gesture(
+                    DragGesture()
+                        .targetedToEntity(curvedScreenEntity)
+                        .onChanged { value in
+//                            let velocityLength = sqrt(pow(value.velocity.width, 2) + pow(value.velocity.height, 2))
+                            let translationLength = sqrt(pow(value.translation.width, 2) + pow(value.translation.height, 2))
+                            let normalizedX = value.translation.width / translationLength
+                            let normalizedY = value.translation.height / translationLength
+//                            let normalizedVelocityX = value.velocity.width / velocityLength
+//                            let normalizedVelocityY = value.velocity.height / velocityLength
+//                            print("Velocity", normalizedVelocityX, normalizedVelocityY)
+                            let translationX = normalizedX * 13
+                            let translationY = normalizedY * 13
+//                            print("Translation", translationX, translationY)
+                            LiSendMouseMoveEvent(
+                                Int16(translationX),
+                                Int16(translationY)
+                            )
+                        }
+                )
                 
                 if let status = mainModel.status {
                     VStack {

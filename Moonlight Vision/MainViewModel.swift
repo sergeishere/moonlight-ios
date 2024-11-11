@@ -304,8 +304,8 @@ class MainViewModel: NSObject, ObservableObject, DiscoveryCallback, PairCallback
         config.gamepadMask = ControllerSupport.getConnectedGamepadMask(config)
         
         // 7.1, always
-        config.audioConfiguration = (0x63f << 16) | (8 << 8) | 0xca
-        //            config.audioConfiguration = (0x3 << 16) | (2 << 8) | 0xca
+//        config.audioConfiguration = (0x63f << 16) | (8 << 8) | 0xca
+                    config.audioConfiguration = (0x3 << 16) | (2 << 8) | 0xca
         
         
         // all of them? i guess? this forces hdr on

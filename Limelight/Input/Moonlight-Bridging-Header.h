@@ -19,12 +19,12 @@
 #import "WakeOnLanManager.h"
 #import "StreamManager.h"
 
+#import "opus.h"
+#import "opus_multistream.h"
+
 #import "MoonlightApp+CoreDataClass.h"
 #import "MoonlightHost+CoreDataClass.h"
 #import "MoonlightSettings+CoreDataClass.h"
 
 #import "Limelight.h"
-
-#if TARGET_OS_VISION
-#import "SDLMainWrapper.h"
-#endif
+#import "Connection.h"

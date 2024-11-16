@@ -13,28 +13,10 @@ struct StreamView: View {
     @Environment(\.scenePhase) var scenePhase
     @EnvironmentObject var mainModel: MainViewModel
     
-    var screenCurvature: Float = 1.8
+    var screenCurvature: Float = 1.4
     
     @State private var dimPassthrough: Bool = false
     @State private var curvedScreenEntity: ModelEntity = ModelEntity()
-    
-    @Namespace var hoverNameSpace
-    var hoverGroup: HoverEffectGroup {
-        HoverEffectGroup(hoverNameSpace)
-    }
-    
-    @State private var isDragging = false
-    
-//    var drag: some Gesture {
-//        DragGesture()
-//            .onChanged { i in
-//
-//                self.isDragging = true
-//            }
-//            .onEnded {
-//                _ in self.isDragging = false
-//            }
-//    }
     
     var body: some View {
         GeometryReader3D { proxy in
@@ -51,7 +33,6 @@ struct StreamView: View {
                             )
                             
                             curvedScreenEntity.name = "CurvedScreen"
-//                            curvedScreenEntity.components.set(AmbientAudioComponent())
                             curvedScreenEntity.components.set(InputTargetComponent())
                             curvedScreenEntity.components.set(
                                 CollisionComponent(
@@ -59,18 +40,7 @@ struct StreamView: View {
                                     filter: CollisionFilter(group: [], mask: [])
                                 )
                             )
-                            
-//                            let configuration = AudioGeneratorConfiguration(layoutTag: kAudioChannelLayoutTag_Stereo)
-//                            mainModel.audioController = try curvedScreenEntity.playAudio(configuration: configuration, { isSilence, timestamp, frameCount, outputData in
-//                                var renderFlags = AudioUnitRenderActionFlags()
-//                                if let renderBlock {
-//                                    return renderBlock(&renderFlags, timestamp, frameCount, 0, outputData, nil, nil)
-//                                } else {
-//                                    return .zero
-//                                }
-//                            })
-//                            mainModel.audioController?.play()
-                            
+                                                       
                             content.add(curvedScreenEntity)
                             
                             Task(priority: .background) {
@@ -154,7 +124,6 @@ struct StreamView: View {
             .hoverEffect { effect, isActive, proxy in
                 effect.opacity(isActive ? 1.0 : 0)
             }
-            .hoverEffectGroup(hoverGroup)
             .padding(12)
         }
         .preferredSurroundingsEffect(dimPassthrough ? .dark : .none)

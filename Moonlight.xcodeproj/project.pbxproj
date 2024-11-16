@@ -9,9 +9,8 @@
 /* Begin PBXBuildFile section */
 		693B3A9B218638CD00982F7B /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 693B3A9A218638CD00982F7B /* Settings.bundle */; };
 		950D86602CCFCC7500683A19 /* StreamViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 950D865F2CCFCC7100683A19 /* StreamViewModel.swift */; };
+		9565BD242CE68AE9006613D4 /* AudioStreamHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9565BD232CE68AE4006613D4 /* AudioStreamHandler.swift */; };
 		957506532CD4004200F28793 /* CurvedScreenBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 957506522CD4003E00F28793 /* CurvedScreenBuilder.swift */; };
-		959462792CE2A7CA008FFC1D /* SDL3.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95CC40162CDC160800FC5858 /* SDL3.xcframework */; };
-		9594627A2CE2A7CA008FFC1D /* SDL3.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 95CC40162CDC160800FC5858 /* SDL3.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		98181BE92791277400E43572 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BE82791275D00E43572 /* libSDL2.a */; };
 		98181BEB2791278F00E43572 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BEA2791278300E43572 /* libSDL2.a */; };
 		98181BED2791281100E43572 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BEC2791281100E43572 /* CoreMotion.framework */; };
@@ -63,7 +62,6 @@
 		F72DD4D62BEEB16A0003CD8A /* OpenSSL in Frameworks */ = {isa = PBXBuildFile; productRef = F72DD4D52BEEB16A0003CD8A /* OpenSSL */; };
 		F72DD4D82BEEB1730003CD8A /* OpenSSL in Frameworks */ = {isa = PBXBuildFile; productRef = F72DD4D72BEEB1730003CD8A /* OpenSSL */; };
 		F72DD4DA2BEEB17B0003CD8A /* OpenSSL in Frameworks */ = {isa = PBXBuildFile; productRef = F72DD4D92BEEB17B0003CD8A /* OpenSSL */; };
-		F778956E2B65975900F02568 /* SDLMainWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = F778956D2B65975900F02568 /* SDLMainWrapper.m */; };
 		F77B58B02B5EF94900482BD5 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77B58AF2B5EF94900482BD5 /* SidebarView.swift */; };
 		F77B58B22B5EFC9000482BD5 /* ComputerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77B58B12B5EFC9000482BD5 /* ComputerView.swift */; };
 		F7A1190C2B5DDF73001E8686 /* Limelight.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FB290D0519B2C406004C83CF /* Limelight.xcdatamodeld */; };
@@ -254,25 +252,12 @@
 		};
 /* End PBXContainerItemProxy section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		9594627B2CE2A7CA008FFC1D /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				9594627A2CE2A7CA008FFC1D /* SDL3.xcframework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
 		566E9D2B2770B23A00EF7BFE /* Moonlight v1.7.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.7.xcdatamodel"; sourceTree = "<group>"; };
 		693B3A9A218638CD00982F7B /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		950D865F2CCFCC7100683A19 /* StreamViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamViewModel.swift; sourceTree = "<group>"; };
 		950D86632CD00A2600683A19 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9565BD232CE68AE4006613D4 /* AudioStreamHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioStreamHandler.swift; sourceTree = "<group>"; };
 		957506522CD4003E00F28793 /* CurvedScreenBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurvedScreenBuilder.swift; sourceTree = "<group>"; };
 		95CC40162CDC160800FC5858 /* SDL3.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = SDL3.xcframework; path = libs/SDL3.xcframework; sourceTree = "<group>"; };
 		9803CCAB254F9EAF00EE185E /* ConnectionCallbacks.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConnectionCallbacks.h; sourceTree = "<group>"; };
@@ -320,8 +305,6 @@
 		F71801542B658B5E00A9336B /* StreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamView.swift; sourceTree = "<group>"; };
 		F7199AFA2B72F33000E6D62D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		F7199AFD2B72FC1400E6D62D /* TemporarySettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporarySettings.swift; sourceTree = "<group>"; };
-		F778956D2B65975900F02568 /* SDLMainWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SDLMainWrapper.m; sourceTree = "<group>"; };
-		F778956F2B65979500F02568 /* SDLMainWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SDLMainWrapper.h; sourceTree = "<group>"; };
 		F77B58AF2B5EF94900482BD5 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		F77B58B12B5EFC9000482BD5 /* ComputerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComputerView.swift; sourceTree = "<group>"; };
 		F7A119552B5DDF73001E8686 /* Moonlight Vision.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Moonlight Vision.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -534,7 +517,6 @@
 				F7A119F72B5DE725001E8686 /* libopus.a in Frameworks */,
 				F72DD4D62BEEB16A0003CD8A /* OpenSSL in Frameworks */,
 				F7A119482B5DDF73001E8686 /* Foundation.framework in Frameworks */,
-				959462792CE2A7CA008FFC1D /* SDL3.xcframework in Frameworks */,
 				F7A119492B5DDF73001E8686 /* CoreFoundation.framework in Frameworks */,
 				F7A1194B2B5DDF73001E8686 /* libavcodec.a in Frameworks */,
 			);
@@ -636,6 +618,7 @@
 		F7A119592B5DE1AB001E8686 /* Moonlight Vision */ = {
 			isa = PBXGroup;
 			children = (
+				9565BD232CE68AE4006613D4 /* AudioStreamHandler.swift */,
 				950D86632CD00A2600683A19 /* Info.plist */,
 				950D865E2CCFCC6200683A19 /* Stream */,
 				F7A1195A2B5DE1E2001E8686 /* MoonlightVisionApp.swift */,
@@ -645,8 +628,6 @@
 				F7199AFA2B72F33000E6D62D /* SettingsView.swift */,
 				F77B58AF2B5EF94900482BD5 /* SidebarView.swift */,
 				F7A4A4D02B5F216C001591F3 /* MainViewModel.swift */,
-				F778956D2B65975900F02568 /* SDLMainWrapper.m */,
-				F778956F2B65979500F02568 /* SDLMainWrapper.h */,
 			);
 			path = "Moonlight Vision";
 			sourceTree = "<group>";
@@ -1073,7 +1054,6 @@
 				F7A1190B2B5DDF73001E8686 /* Sources */,
 				F7A1193D2B5DDF73001E8686 /* Frameworks */,
 				F7A1194C2B5DDF73001E8686 /* Resources */,
-				9594627B2CE2A7CA008FFC1D /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1282,6 +1262,7 @@
 				F7A1192E2B5DDF73001E8686 /* ConnectionHelper.m in Sources */,
 				F7A1192F2B5DDF73001E8686 /* PairManager.m in Sources */,
 				F7A119302B5DDF73001E8686 /* HttpRequest.m in Sources */,
+				9565BD242CE68AE9006613D4 /* AudioStreamHandler.swift in Sources */,
 				F7A119312B5DDF73001E8686 /* OnScreenControls.m in Sources */,
 				F7A119332B5DDF73001E8686 /* X1Kit.swift in Sources */,
 				F7A119342B5DDF73001E8686 /* AppAssetManager.m in Sources */,
@@ -1293,7 +1274,6 @@
 				F7A119382B5DDF73001E8686 /* DataManager.m in Sources */,
 				F7A1193A2B5DDF73001E8686 /* ServerInfoResponse.m in Sources */,
 				F71801552B658B5E00A9336B /* StreamView.swift in Sources */,
-				F778956E2B65975900F02568 /* SDLMainWrapper.m in Sources */,
 				F7A1193B2B5DDF73001E8686 /* StreamManager.m in Sources */,
 				F7A1193C2B5DDF73001E8686 /* KeyboardInputField.m in Sources */,
 				957506532CD4004200F28793 /* CurvedScreenBuilder.swift in Sources */,

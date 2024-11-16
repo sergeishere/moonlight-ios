@@ -11,6 +11,7 @@ import OrderedCollections
 import VideoToolbox
 import SwiftUI
 import RealityFoundation
+import os.log
 
 @MainActor
 class MainViewModel: NSObject, ObservableObject, DiscoveryCallback, PairCallback, AppAssetCallback {
@@ -46,6 +47,8 @@ class MainViewModel: NSObject, ObservableObject, DiscoveryCallback, PairCallback
     var currentStreamingApp: TemporaryApp?
     var videoMaterial: VideoMaterial
     
+    var audioController: AudioGeneratorController?
+    
     nonisolated(unsafe) var controllerSupport: ControllerSupport?
     
     override init() {
@@ -67,6 +70,15 @@ class MainViewModel: NSObject, ObservableObject, DiscoveryCallback, PairCallback
         appManager = AppAssetManager(callback: self)
         discoveryManager = DiscoveryManager(hosts: hosts, andCallback: self)
         connectionCallbacks.model = self
+        
+        let sharedAudioSession = AVAudioSession.sharedInstance()
+        do {
+            try sharedAudioSession.setCategory(.playback, options: .mixWithOthers)
+            try sharedAudioSession.setActive(true)
+            os_log("Set audio session category")
+        } catch {
+            os_log(.error, "Unable to set audio session category")
+        }
     }
     
     func setHosts(newHosts: [TemporaryHost]) {

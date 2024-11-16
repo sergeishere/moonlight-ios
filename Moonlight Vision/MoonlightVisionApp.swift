@@ -2,6 +2,7 @@
 
 import SwiftUI
 
+@main
 struct MoonlightVisionApp: SwiftUI.App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
@@ -40,10 +41,10 @@ struct MoonlightVisionApp: SwiftUI.App {
 
 }
 
-@main
-struct MainWrapper {
-    static func main() -> Void {
-        SDLMainWrapper.setMainReady();
-        MoonlightVisionApp.main()
-    }
-}
+//@main
+//struct MainWrapper {
+//    static func main() -> Void {
+//        SDLMainWrapper.setMainReady();
+//        MoonlightVisionApp.main()
+//    }
+//}

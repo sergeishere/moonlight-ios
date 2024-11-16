@@ -49,8 +49,9 @@ struct StreamView: View {
                                 mesh: meshResource,
                                 materials: [ mainModel.videoMaterial ]
                             )
-                            curvedScreenEntity.name = "CurvedScreen"
                             
+                            curvedScreenEntity.name = "CurvedScreen"
+//                            curvedScreenEntity.components.set(AmbientAudioComponent())
                             curvedScreenEntity.components.set(InputTargetComponent())
                             curvedScreenEntity.components.set(
                                 CollisionComponent(
@@ -58,6 +59,17 @@ struct StreamView: View {
                                     filter: CollisionFilter(group: [], mask: [])
                                 )
                             )
+                            
+//                            let configuration = AudioGeneratorConfiguration(layoutTag: kAudioChannelLayoutTag_Stereo)
+//                            mainModel.audioController = try curvedScreenEntity.playAudio(configuration: configuration, { isSilence, timestamp, frameCount, outputData in
+//                                var renderFlags = AudioUnitRenderActionFlags()
+//                                if let renderBlock {
+//                                    return renderBlock(&renderFlags, timestamp, frameCount, 0, outputData, nil, nil)
+//                                } else {
+//                                    return .zero
+//                                }
+//                            })
+//                            mainModel.audioController?.play()
                             
                             content.add(curvedScreenEntity)
                             
@@ -92,10 +104,15 @@ struct StreamView: View {
                     }
                 }
                 .handlesGameControllerEvents(matching: .gamepad)
-                .onTapGesture {
+                .onTapGesture(perform: { (point: CGPoint) in
+                    LiSendMousePositionEvent(Int16(point.x), Int16(point.y), Int16(proxy.size.width), Int16(proxy.size.height))
                     LiSendMouseButtonEvent(CChar(BUTTON_ACTION_PRESS), BUTTON_LEFT)
                     LiSendMouseButtonEvent(CChar(BUTTON_ACTION_RELEASE), BUTTON_LEFT)
-                }
+                })
+//                .onTapGesture {
+//                    LiSendMouseButtonEvent(CChar(BUTTON_ACTION_PRESS), BUTTON_LEFT)
+//                    LiSendMouseButtonEvent(CChar(BUTTON_ACTION_RELEASE), BUTTON_LEFT)
+//                }
                 .onLongPressGesture(minimumDuration: 0.3) {
                     LiSendMouseButtonEvent(CChar(BUTTON_ACTION_PRESS), BUTTON_RIGHT)
                     LiSendMouseButtonEvent(CChar(BUTTON_ACTION_RELEASE), BUTTON_RIGHT)

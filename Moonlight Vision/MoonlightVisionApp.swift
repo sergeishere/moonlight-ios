@@ -1,6 +1,7 @@
 //
 
 import SwiftUI
+import os.log
 
 @main
 struct MoonlightVisionApp: SwiftUI.App {
@@ -32,6 +33,17 @@ struct MoonlightVisionApp: SwiftUI.App {
                         let scaledSize = displaySize.applying(.init(scaleX: scale, y: scale))
                         let geometry = UIWindowScene.GeometryPreferences.Vision(size: scaledSize, resizingRestrictions: .uniform)
                         streamViewScene.requestGeometryUpdate(geometry)
+                        
+                        do {
+                            try AVAudioSession.sharedInstance().setIntendedSpatialExperience(
+                                .headTracked(
+                                    soundStageSize: .automatic,
+                                    anchoringStrategy: .scene(identifier: streamViewScene.session.persistentIdentifier)
+                                )
+                            )
+                        } catch {
+                            os_log(.error, "Unable to set spatial experience")
+                        }
                     }
             }
         }
@@ -40,11 +52,3 @@ struct MoonlightVisionApp: SwiftUI.App {
     }
 
 }
-
-//@main
-//struct MainWrapper {
-//    static func main() -> Void {
-//        SDLMainWrapper.setMainReady();
-//        MoonlightVisionApp.main()
-//    }
-//}

@@ -22,9 +22,7 @@ public var audioConverter: AVAudioConverter!
 
 public var audioBuffer: AVAudioBuffer!
 
-var renderBlock: AUInternalRenderBlock?
-
-let audioQueue: DispatchQueue = DispatchQueue(label: "Audio", qos: .default)
+let audioQueue: DispatchQueue = DispatchQueue(label: "AudioRendering", qos: .default)
 
 @_cdecl("ArInit") func ArInit(
     audioConfiguration: Int32,
@@ -32,7 +30,6 @@ let audioQueue: DispatchQueue = DispatchQueue(label: "Audio", qos: .default)
     context: UnsafeMutableRawPointer,
     flags: Int32
 ) -> Int32 {
-    
     
     opusConfig = opusConfigPointer.pointee
     do {
@@ -65,12 +62,6 @@ let audioQueue: DispatchQueue = DispatchQueue(label: "Audio", qos: .default)
     audioEngine.reset()
     audioPlayerNode = AVAudioPlayerNode()
     audioEnvironmentNode = AVAudioEnvironmentNode()
-//    audioFormat = AVAudioFormat(
-//        commonFormat: .pcmFormatInt16,
-//        sampleRate: Double(opusConfig.sampleRate),
-//        channels: AVAudioChannelCount(opusConfig.channelCount),
-//        interleaved: true
-//    )
     
     audioFormat = AVAudioFormat(
         commonFormat: .pcmFormatFloat32,
@@ -78,53 +69,24 @@ let audioQueue: DispatchQueue = DispatchQueue(label: "Audio", qos: .default)
         channels: AVAudioChannelCount(opusConfig.channelCount),
         interleaved: true
     )
-//    dump(audioFormat.streamDescription.pointee)
-    
-//    destAudioDescription = AudioStreamBasicDescription(
-//        mSampleRate: 48000.0,
-//        mFormatID: kAudioFormatLinearPCM,
-//        mFormatFlags: AudioFormatFlags(kAudioFormatFlagIsFloat | kAudioFormatFlagIsPacked | kAudioFormatFlagIsNonInterleaved),
-//        mBytesPerPacket: UInt32(4),           // 1 channels * 4 bytes per float32
-//        mFramesPerPacket: 1,                  // For PCM, one frame per packet
-//        mBytesPerFrame: UInt32(4),            // 2 channels * 4 bytes per float32
-//        mChannelsPerFrame: 2,                 // Stereo
-//        mBitsPerChannel: 32,                  // Float32 = 32 bits
-//        mReserved: 0
-//    )
-//    
-//    destinationFormat = AVAudioFormat(streamDescription: &destAudioDescription)
-//    dump(audioFormat.streamDescription.pointee)
-//
+
     destinationFormat = AVAudioFormat(
         commonFormat: .pcmFormatFloat32,
         sampleRate: Double(opusConfig.sampleRate),
         channels: AVAudioChannelCount(opusConfig.channelCount),
         interleaved: false
     )
-    dump(destinationFormat.streamDescription.pointee)
     
     audioConverter = AVAudioConverter(from: audioFormat, to: destinationFormat)
     audioEngine.attach(audioPlayerNode)
-//    audioEngine.attach(audioEnvironmentNode)
+    audioEngine.attach(audioEnvironmentNode)
     audioEngine.connect(audioPlayerNode, to: audioEngine.mainMixerNode, format: destinationFormat)
-//    audioEngine.connect(audioPlayerNode, to: audioEnvironmentNode, format: destinationFormat)
-//    audioEngine.connect(audioEnvironmentNode, to: audioEngine.mainMixerNode, format: nil)
-//    
-//    audioEnvironmentNode.listenerPosition = AVAudio3DPoint(x: 0, y: 0, z: 1)
     
     audioQueue.async {
         audioEngine.prepare()
         try? audioEngine.start()
         audioPlayerNode.play()
     }
-    
-//    let audioUnit = audioEngine.outputNode.auAudioUnit
-//    do {
-//        try audioUnit.allocateRenderResources()
-//        renderBlock = audioUnit.internalRenderBlock
-//    } catch {
-//        os_log(.error, "Could not allocate render resources: \(error)")
-//    }
     
     return 0
 }
@@ -151,15 +113,6 @@ let audioQueue: DispatchQueue = DispatchQueue(label: "Audio", qos: .default)
     sampleData: UnsafeMutablePointer<CChar>,
     sampleLength: Int32
 ) {
-    
-//    guard let int16Buffer = AVAudioPCMBuffer(
-//        pcmFormat: audioFormat,
-//        frameCapacity: AUAudioFrameCount(opusConfig.samplesPerFrame)
-//    )
-//    else {
-//        os_log(.error, "Could not create an output PCM buffer")
-//        return
-//    }
     
     guard let float32BufferInt = AVAudioPCMBuffer(
         pcmFormat: audioFormat,
@@ -191,7 +144,6 @@ let audioQueue: DispatchQueue = DispatchQueue(label: "Audio", qos: .default)
         audioQueue.async {
             do {
                 try audioConverter.convert(to: float32Buffer, from: float32BufferInt)
-                let time = audioPlayerNode.lastRenderTime.map { audioPlayerNode.playerTime(forNodeTime: $0) } ?? nil
                 audioPlayerNode.scheduleBuffer(float32Buffer)
             } catch {
                 os_log(.error, "Could not convert to float32 buffer")

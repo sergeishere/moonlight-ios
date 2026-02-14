@@ -8,9 +8,16 @@
 
 #import "HttpManager.h"
 #import "HttpRequest.h"
-#import "CryptoManager.h"
 #import "TemporaryApp.h"
 #import "ServerInfoResponse.h"
+
+#if __has_include("Moonlight-Swift.h")
+#import "Moonlight-Swift.h"
+#elif __has_include("Moonlight_TV-Swift.h")
+#import "Moonlight_TV-Swift.h"
+#elif __has_include("Moonlight_Vision-Swift.h")
+#import "Moonlight_Vision-Swift.h"
+#endif
 
 #include <libxml2/libxml/xmlreader.h>
 #include <string.h>
@@ -331,27 +338,43 @@
 
 // Returns the identity
 - (SecIdentityRef)getClientCertificate {
-    SecIdentityRef identityApp = nil;
-    CFDataRef p12Data = (__bridge CFDataRef)[CryptoManager readP12FromFile];
-
-    CFStringRef password = CFSTR("limelight");
-    const void *keys[] = { kSecImportExportPassphrase };
-    const void *values[] = { password };
-    CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, 1, NULL, NULL);
-    CFArrayRef items = CFArrayCreate(NULL, 0, 0, NULL);
-    OSStatus securityError = SecPKCS12Import(p12Data, options, &items);
-
-    if (securityError == errSecSuccess) {
-        //Log(LOG_D, @"Success opening p12 certificate. Items: %ld", CFArrayGetCount(items));
-        CFDictionaryRef identityDict = CFArrayGetValueAtIndex(items, 0);
-        identityApp = (SecIdentityRef)CFDictionaryGetValue(identityDict, kSecImportItemIdentity);
-    } else {
-        Log(LOG_E, @"Error opening Certificate.");
+    // Try Keychain first (new path)
+    SecIdentityRef identityApp = [CryptoManager getIdentityFromKeychain];
+    if (identityApp != nil) {
+        return identityApp;
     }
-    
-    CFRelease(options);
-    CFRelease(password);
-    
+
+    // Fallback: import from legacy PKCS12 file
+    NSData *p12Data = [CryptoManager readP12FromFile];
+    if (p12Data != nil) {
+        // Migrate to Keychain for future use
+        [CryptoManager migratePKCS12ToKeychain:p12Data password:@"limelight"];
+
+        // Try Keychain again after migration
+        identityApp = [CryptoManager getIdentityFromKeychain];
+        if (identityApp != nil) {
+            return identityApp;
+        }
+
+        // Direct PKCS12 import as last resort
+        CFStringRef password = CFSTR("limelight");
+        const void *keys[] = { kSecImportExportPassphrase };
+        const void *values[] = { password };
+        CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, 1, NULL, NULL);
+        CFArrayRef items = CFArrayCreate(NULL, 0, 0, NULL);
+        OSStatus securityError = SecPKCS12Import((__bridge CFDataRef)p12Data, options, &items);
+
+        if (securityError == errSecSuccess) {
+            CFDictionaryRef identityDict = CFArrayGetValueAtIndex(items, 0);
+            identityApp = (SecIdentityRef)CFDictionaryGetValue(identityDict, kSecImportItemIdentity);
+        } else {
+            Log(LOG_E, @"Error opening Certificate.");
+        }
+
+        CFRelease(options);
+        CFRelease(password);
+    }
+
     return identityApp;
 }
 

@@ -18,6 +18,8 @@ static NSOperationQueue* mainQueue;
 
 #if TARGET_OS_TV
 static NSString* DB_NAME = @"Moonlight_tvOS.bin";
+#elif TARGET_OS_VISION
+static NSString* DB_NAME = @"Moonlight_Vision.sqlite";
 #else
 static NSString* DB_NAME = @"Limelight_iOS.sqlite";
 #endif

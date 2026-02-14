@@ -7,6 +7,7 @@
 //
 
 #import "StreamView.h"
+#import <objc/runtime.h>
 #include <Limelight.h>
 #import "DataManager.h"
 #import "ControllerSupport.h"
@@ -15,28 +16,21 @@
 #import "AbsoluteTouchHandler.h"
 #import "KeyboardInputField.h"
 
-static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
-
 @implementation StreamView {
     OnScreenControls* onScreenControls;
-    
+
     KeyboardInputField* keyInputField;
     BOOL isInputingText;
     NSMutableSet* keysDown;
-    
+
     float streamAspectRatio;
-    
+
     // iOS 13.4 mouse support
     NSInteger lastMouseButtonMask;
     float lastMouseX;
     float lastMouseY;
     CGPoint lastScrollTranslation;
-    
-    // Citrix X1 mouse support
-    X1Mouse* x1mouse;
-    double accumulatedMouseDeltaX;
-    double accumulatedMouseDeltaY;
-    
+
     UIResponder* touchHandler;
     
     id<UserInteractionDelegate> interactionDelegate;
@@ -62,7 +56,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [keyInputField setSpellCheckingType:UITextSpellCheckingTypeNo];
     [self addSubview:keyInputField];
     
-#if TARGET_OS_TV
+#if TARGET_OS_TV 
     // tvOS requires RelativeTouchHandler to manage Apple Remote input
     self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self];
 #else
@@ -116,13 +110,6 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     }
 #endif
 #endif
-    
-    x1mouse = [[X1Mouse alloc] init];
-    x1mouse.delegate = self;
-    
-    if (settings.btMouseSupport) {
-        [x1mouse start];
-    }
     
     // This is critical to ensure keyboard events are delivered to this
     // StreamView and not our parent UIView, especially on tvOS.
@@ -361,7 +348,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 // Prepare the textbox used to capture keyboard events.
                 keyInputField.delegate = self;
                 keyInputField.text = @"0";
-#if !TARGET_OS_TV
+#if !TARGET_OS_TV && !TARGET_OS_VISION
                 // Prepare the toolbar above the keyboard for more options
                 UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
                 
@@ -900,53 +887,6 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     }
     
     return commands;
-}
-
-- (void)connectedStateDidChangeWithIdentifier:(NSUUID * _Nonnull)identifier isConnected:(BOOL)isConnected {
-    NSLog(@"Citrix X1 mouse state change: %@ -> %s",
-          identifier, isConnected ? "connected" : "disconnected");
-}
-
-- (void)mouseDidMoveWithIdentifier:(NSUUID * _Nonnull)identifier deltaX:(int16_t)deltaX deltaY:(int16_t)deltaY {
-    accumulatedMouseDeltaX += deltaX / X1_MOUSE_SPEED_DIVISOR;
-    accumulatedMouseDeltaY += deltaY / X1_MOUSE_SPEED_DIVISOR;
-    
-    short shortX = (short)accumulatedMouseDeltaX;
-    short shortY = (short)accumulatedMouseDeltaY;
-    
-    if (shortX == 0 && shortY == 0) {
-        return;
-    }
-    
-    LiSendMouseMoveEvent(shortX, shortY);
-    
-    accumulatedMouseDeltaX -= shortX;
-    accumulatedMouseDeltaY -= shortY;
-}
-
-- (int) buttonFromX1ButtonCode:(enum X1MouseButton)button {
-    switch (button) {
-        case X1MouseButtonLeft:
-            return BUTTON_LEFT;
-        case X1MouseButtonRight:
-            return BUTTON_RIGHT;
-        case X1MouseButtonMiddle:
-            return BUTTON_MIDDLE;
-        default:
-            return -1;
-    }
-}
-
-- (void)mouseDownWithIdentifier:(NSUUID * _Nonnull)identifier button:(enum X1MouseButton)button {
-    LiSendMouseButtonEvent(BUTTON_ACTION_PRESS, [self buttonFromX1ButtonCode:button]);
-}
-
-- (void)mouseUpWithIdentifier:(NSUUID * _Nonnull)identifier button:(enum X1MouseButton)button {
-    LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, [self buttonFromX1ButtonCode:button]);
-}
-
-- (void)wheelDidScrollWithIdentifier:(NSUUID * _Nonnull)identifier deltaZ:(int8_t)deltaZ {
-    LiSendScrollEvent(deltaZ);
 }
 
 #if !TARGET_OS_TV

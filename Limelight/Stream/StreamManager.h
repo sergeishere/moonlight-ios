@@ -11,7 +11,9 @@
 
 @interface StreamManager : NSOperation
 
-- (id) initWithConfig:(StreamConfiguration*)config renderView:(UIView*)view connectionCallbacks:(id<ConnectionCallbacks>)callback;
+@property (strong, nonatomic) Connection* connection;
+
+- (id) initWithConfig:(StreamConfiguration*)config renderView:(UIView*)view sampleBufferVideoRenderer:(AVSampleBufferVideoRenderer*)renderer connectionCallbacks:(id<ConnectionCallbacks>)callback;
 
 - (void) stopStream;
 

@@ -10,7 +10,7 @@
 #import "AppDelegate.h"
 
 #define SDL_MAIN_HANDLED
-#import <SDL.h>
+#import <SDL3/SDL_main.h>
 
 int main(int argc, char * argv[]) {
     @autoreleasepool {

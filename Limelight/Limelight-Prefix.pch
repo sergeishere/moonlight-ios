@@ -6,6 +6,7 @@
 
 #import <Availability.h>
 #include <TargetConditionals.h>
+#include <sys/_types/_time_t.h>
 
 #ifndef __IPHONE_3_0
 #warning "This project uses features only available in iOS SDK 3.0 and later."

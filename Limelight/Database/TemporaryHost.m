@@ -16,7 +16,7 @@
     self = [super init];
     self.appList = [[NSMutableSet alloc] init];
     self.currentGame = @"0";
-    self.state = StateUnknown;
+    self.state = HostStateUnknown;
     
     return self;
 }

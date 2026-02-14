@@ -7,7 +7,13 @@
 //
 
 #import "DiscoveryManager.h"
-#import "CryptoManager.h"
+#if __has_include("Moonlight-Swift.h")
+#import "Moonlight-Swift.h"
+#elif __has_include("Moonlight_TV-Swift.h")
+#import "Moonlight_TV-Swift.h"
+#elif __has_include("Moonlight_Vision-Swift.h")
+#import "Moonlight_Vision-Swift.h"
+#endif
 #import "HttpManager.h"
 #import "Utils.h"
 #import "DataManager.h"
@@ -29,6 +35,7 @@
     NSString* _uniqueId;
     NSData* _cert;
     BOOL shouldDiscover;
+    dispatch_source_t _updateTimer;
 }
 
 - (id)initWithHosts:(NSArray *)hosts andCallback:(id<DiscoveryCallback>)callback {
@@ -141,7 +148,7 @@
     if ([serverInfoResponse isStatusOk]) {
         host = [[TemporaryHost alloc] init];
         host.activeAddress = host.address = hostAddress;
-        host.state = StateOnline;
+        host.state = HostStateOnline;
         [serverInfoResponse populateHost:host];
         
         // Check if this is a new PC
@@ -217,11 +224,11 @@
     if (shouldDiscover) {
         return;
     }
-    
+
     Log(LOG_I, @"Starting discovery");
     shouldDiscover = YES;
     [_mdnsMan searchForHosts];
-    
+
     @synchronized (_hostQueue) {
         for (TemporaryHost* host in _hostQueue) {
             if (![_pausedHosts containsObject:host]) {
@@ -229,24 +236,28 @@
             }
         }
     }
+
+    [self startUpdateTimer];
 }
 
 - (void) stopDiscovery {
     if (!shouldDiscover) {
         return;
     }
-    
+
     Log(LOG_I, @"Stopping discovery");
     shouldDiscover = NO;
+    [self stopUpdateTimer];
     [_mdnsMan stopSearching];
     [_opQueue cancelAllOperations];
 }
 
 - (void) stopDiscoveryBlocking {
     Log(LOG_I, @"Stopping discovery and waiting for workers to stop");
-    
+
     if (shouldDiscover) {
         shouldDiscover = NO;
+        [self stopUpdateTimer];
         [_mdnsMan stopSearching];
         [_opQueue cancelAllOperations];
     }
@@ -370,6 +381,28 @@
 - (NSOperation*) createWorkerForHost:(TemporaryHost*)host {
     DiscoveryWorker* worker = [[DiscoveryWorker alloc] initWithHost:host uniqueId:_uniqueId];
     return worker;
+}
+
+// MARK: - Periodic state update timer
+
+- (void) startUpdateTimer {
+    [self stopUpdateTimer];
+
+    _updateTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
+    dispatch_source_set_timer(_updateTimer, dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC), 3 * NSEC_PER_SEC, 1 * NSEC_PER_SEC);
+    dispatch_source_set_event_handler(_updateTimer, ^{
+        @synchronized (self->_hostQueue) {
+            [self->_callback updateAllHosts:self->_hostQueue];
+        }
+    });
+    dispatch_resume(_updateTimer);
+}
+
+- (void) stopUpdateTimer {
+    if (_updateTimer) {
+        dispatch_source_cancel(_updateTimer);
+        _updateTimer = nil;
+    }
 }
 
 @end

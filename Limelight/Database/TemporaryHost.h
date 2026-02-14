@@ -11,7 +11,7 @@
 
 @interface TemporaryHost : NSObject
 
-@property (atomic) State state;
+@property (atomic) HostState state;
 @property (atomic) PairState pairState;
 @property (atomic, nullable, retain) NSString * activeAddress;
 @property (atomic, nullable, retain) NSString * currentGame;

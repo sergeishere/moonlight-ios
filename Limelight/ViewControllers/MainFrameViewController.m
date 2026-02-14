@@ -8,7 +8,13 @@
 @import ImageIO;
 
 #import "MainFrameViewController.h"
-#import "CryptoManager.h"
+#if __has_include("Moonlight-Swift.h")
+#import "Moonlight-Swift.h"
+#elif __has_include("Moonlight_TV-Swift.h")
+#import "Moonlight_TV-Swift.h"
+#elif __has_include("Moonlight_Vision-Swift.h")
+#import "Moonlight_Vision-Swift.h"
+#endif
 #import "HttpManager.h"
 #import "Connection.h"
 #import "StreamManager.h"
@@ -189,7 +195,7 @@ static NSMutableSet* hostList;
                     [self showHostSelectionView];
                     [[self activeViewController] presentViewController:applistAlert animated:YES completion:nil];
                 }];
-                host.state = StateOffline;
+                host.state = HostStateOffline;
             });
         } else {
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -330,7 +336,7 @@ static NSMutableSet* hostList;
     // This shows the context menu with wake, delete, etc. rather
     // than just hanging for a while and failing as we would in this
     // code path.
-    if (host.state != StateOnline && view != nil) {
+    if (host.state != HostStateOnline && view != nil) {
         [self hostLongClicked:host view:view];
         return;
     }
@@ -351,7 +357,7 @@ static NSMutableSet* hostList;
     // should hit most. Check for a valid view because we don't want to hit the fast
     // path after coming back from streaming, since we need to fetch serverinfo too
     // so that our active game data is correct.
-    if (host.state == StateOnline && host.pairState == PairStatePaired && host.appList.count > 0 && view != nil) {
+    if (host.state == HostStateOnline && host.pairState == PairStatePaired && host.appList.count > 0 && view != nil) {
         [self alreadyPaired];
         return;
     }
@@ -359,12 +365,12 @@ static NSMutableSet* hostList;
     [self showLoadingFrame: ^{
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             // Wait for the PC's status to be known
-            while (host.state == StateUnknown) {
+            while (host.state == HostStateUnknown) {
                 sleep(1);
             }
             
             // Don't bother polling if the server is already offline
-            if (host.state == StateOffline) {
+            if (host.state == HostStateOffline) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [self hideLoadingFrame:^{
                         [self showHostSelectionView];
@@ -405,7 +411,7 @@ static NSMutableSet* hostList;
                         }
                     }];
                     
-                    host.state = StateOffline;
+                    host.state = HostStateOffline;
                 });
             } else {
                 // Update the host object with this data
@@ -436,12 +442,25 @@ static NSMutableSet* hostList;
 }
 
 - (UIViewController*) activeViewController {
+#if TARGET_OS_VISION
+    // Get the active scene
+    UIWindowScene *activeScene = nil;
+    for (UIScene *scene in [UIApplication sharedApplication].connectedScenes) {
+        if ([scene isKindOfClass:[UIWindowScene class]] && scene.activationState == UISceneActivationStateForegroundActive) {
+            activeScene = (UIWindowScene *)scene;
+            break;
+        }
+    }
+    
+    UIViewController *topController = activeScene ? activeScene.windows.firstObject.rootViewController : nil;
+#else
     UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
-
+#endif
+    
     while (topController.presentedViewController) {
         topController = topController.presentedViewController;
     }
-
+    
     return topController;
 }
 
@@ -450,11 +469,11 @@ static NSMutableSet* hostList;
     NSString* message;
     
     switch (host.state) {
-        case StateOffline:
+        case HostStateOffline:
             message = @"Offline";
             break;
             
-        case StateOnline:
+        case HostStateOnline:
             if (host.pairState == PairStatePaired) {
                 message = @"Online - Paired";
             }
@@ -463,7 +482,7 @@ static NSMutableSet* hostList;
             }
             break;
         
-        case StateUnknown:
+        case HostStateUnknown:
             message = @"Connecting";
             break;
             
@@ -472,7 +491,7 @@ static NSMutableSet* hostList;
     }
     
     UIAlertController* longClickAlert = [UIAlertController alertControllerWithTitle:host.name message:message preferredStyle:UIAlertControllerStyleActionSheet];
-    if (host.state != StateOnline) {
+    if (host.state != HostStateOnline) {
         [longClickAlert addAction:[UIAlertAction actionWithTitle:@"Wake PC" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
             UIAlertController* wolAlert = [UIAlertController alertControllerWithTitle:@"Wake-On-LAN" message:@"" preferredStyle:UIAlertControllerStyleAlert];
             [wolAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
@@ -531,7 +550,7 @@ static NSMutableSet* hostList;
         }];
     }]];
 #if !TARGET_OS_TV
-    if (host.state != StateOnline) {
+    if (host.state != HostStateOnline) {
         [longClickAlert addAction:[UIAlertAction actionWithTitle:@"NVIDIA GameStream End-of-Service" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
             [Utils launchUrl:@"https://github.com/moonlight-stream/moonlight-docs/wiki/NVIDIA-GameStream-End-Of-Service-Announcement-FAQ"];
         }]];
@@ -614,11 +633,19 @@ static NSMutableSet* hostList;
     
     _streamConfig.frameRate = [streamSettings.framerate intValue];
     if (@available(iOS 10.3, *)) {
+#if TARGET_OS_VISION
+        // Don't stream more FPS than the display can show
+        if (_streamConfig.frameRate > 90) {
+            _streamConfig.frameRate = 90;
+            Log(LOG_W, @"Clamping FPS to maximum refresh rate: %d", _streamConfig.frameRate);
+        }
+#else
         // Don't stream more FPS than the display can show
         if (_streamConfig.frameRate > [UIScreen mainScreen].maximumFramesPerSecond) {
             _streamConfig.frameRate = (int)[UIScreen mainScreen].maximumFramesPerSecond;
             Log(LOG_W, @"Clamping FPS to maximum refresh rate: %d", _streamConfig.frameRate);
         }
+#endif
     }
     
     _streamConfig.height = [streamSettings.height intValue];
@@ -870,7 +897,7 @@ static NSMutableSet* hostList;
     return nil;
 }
 
-#if !TARGET_OS_TV
+#if !TARGET_OS_TV & !TARGET_OS_VISION
 - (void)revealController:(SWRevealViewController *)revealController didMoveToPosition:(FrontViewPosition)position {
     // If we moved back to the center position, we should save the settings
     if (position == FrontViewPositionLeft) {
@@ -923,7 +950,25 @@ static NSMutableSet* hostList;
 {
     [super viewDidLoad];
         
-#if !TARGET_OS_TV
+#if TARGET_OS_TV
+    
+    // The settings button will direct the user into the Settings app on tvOS
+    [_settingsButton setTarget:self];
+    [_settingsButton setAction:@selector(openTvSettings:)];
+    
+    // Restore focus on the selected app on view controller pop navigation
+    self.restoresFocusAfterTransition = NO;
+    self.collectionView.remembersLastFocusedIndexPath = YES;
+    
+    _menuRecognizer = [[UITapGestureRecognizer alloc] init];
+    [_menuRecognizer addTarget:self action: @selector(showHostSelectionView)];
+    _menuRecognizer.allowedPressTypes = [[NSArray alloc] initWithObjects:[NSNumber numberWithLong:UIPressTypeMenu], nil];
+    
+    self.navigationController.navigationBar.titleTextAttributes = [NSDictionary dictionaryWithObject:[UIColor whiteColor] forKey:NSForegroundColorAttributeName];
+#elif TARGET_OS_VISION
+    [_settingsButton setTarget:self];
+    [_settingsButton setAction:@selector(openVisionSettings:)];
+#else
     // Set the side bar button action. When it's tapped, it'll show the sidebar.
     [_settingsButton setTarget:self.revealViewController];
     [_settingsButton setAction:@selector(revealToggle:)];
@@ -942,20 +987,6 @@ static NSMutableSet* hostList;
     // Disable bounce-back on reveal VC otherwise the settings will snap closed
     // if the user drags all the way off the screen opposite the settings pane.
     self.revealViewController.bounceBackOnOverdraw = NO;
-#else
-    // The settings button will direct the user into the Settings app on tvOS
-    [_settingsButton setTarget:self];
-    [_settingsButton setAction:@selector(openTvSettings:)];
-    
-    // Restore focus on the selected app on view controller pop navigation
-    self.restoresFocusAfterTransition = NO;
-    self.collectionView.remembersLastFocusedIndexPath = YES;
-    
-    _menuRecognizer = [[UITapGestureRecognizer alloc] init];
-    [_menuRecognizer addTarget:self action: @selector(showHostSelectionView)];
-    _menuRecognizer.allowedPressTypes = [[NSArray alloc] initWithObjects:[NSNumber numberWithLong:UIPressTypeMenu], nil];
-    
-    self.navigationController.navigationBar.titleTextAttributes = [NSDictionary dictionaryWithObject:[UIColor whiteColor] forKey:NSForegroundColorAttributeName];
 #endif
     
     _loadingFrame = [self.storyboard instantiateViewControllerWithIdentifier:@"loadingFrame"];
@@ -1028,6 +1059,13 @@ static NSMutableSet* hostList;
 }
 #endif
 
+#if TARGET_OS_VISION
+- (void)openVisionSettings:(id)sender
+{
+    [self performSegueWithIdentifier:@"openSettings" sender:nil];
+}
+#endif
+
 -(void)beginForegroundRefresh
 {
     if (!_background) {
@@ -1096,7 +1134,7 @@ static NSMutableSet* hostList;
 {
     [super viewDidAppear:animated];
     
-#if !TARGET_OS_TV
+#if !TARGET_OS_TV & !TARGET_OS_VISION
     [[self revealViewController] setPrimaryViewController:self];
 #endif
     

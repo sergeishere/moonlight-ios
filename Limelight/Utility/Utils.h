@@ -6,6 +6,8 @@
 //  Copyright (c) 2014 Moonlight Stream. All rights reserved.
 //
 
+#import <UIKit/UIKit.h>
+
 @interface Utils : NSObject
 
 typedef NS_ENUM(int, PairState) {
@@ -14,10 +16,10 @@ typedef NS_ENUM(int, PairState) {
     PairStatePaired
 };
 
-typedef NS_ENUM(int, State) {
-    StateUnknown,
-    StateOffline,
-    StateOnline
+typedef NS_ENUM(int, HostState) {
+    HostStateUnknown,
+    HostStateOffline,
+    HostStateOnline
 };
 
 FOUNDATION_EXPORT NSString *const deviceName;

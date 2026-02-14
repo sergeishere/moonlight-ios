@@ -91,7 +91,7 @@ static const float POLL_RATE = 2.0f; // Poll every 2 seconds
     
     // Give the PC 2 tries to respond before declaring it offline if we've seen it before.
     // If this is an unknown PC, update the status after 1 attempt to get the UI refreshed quickly.
-    for (int i = 0; i < (_host.state == StateUnknown ? 1 : 2); i++) {
+    for (int i = 0; i < (_host.state == HostStateUnknown ? 1 : 2); i++) {
         for (NSString *address in addresses) {
             if (self.cancelled) {
                 // Get out without updating the status because
@@ -119,7 +119,7 @@ static const float POLL_RATE = 2.0f; // Poll every 2 seconds
         }
     }
 
-    _host.state = receivedResponse ? StateOnline : StateOffline;
+    _host.state = receivedResponse ? HostStateOnline : HostStateOffline;
     if (receivedResponse) {
         Log(LOG_D, @"Received response from: %@\n{\n\t address:%@ \n\t localAddress:%@ \n\t externalAddress:%@ \n\t ipv6Address:%@ \n\t uuid:%@ \n\t mac:%@ \n\t pairState:%d \n\t online:%d \n\t activeAddress:%@ \n}", _host.name, _host.address, _host.localAddress, _host.externalAddress, _host.ipv6Address, _host.uuid, _host.mac, _host.pairState, _host.state, _host.activeAddress);
     }

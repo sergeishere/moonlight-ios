@@ -18,8 +18,21 @@
     self.loadingSpinner.center = CGPointMake(self.view.frame.size.width / 2, self.view.frame.size.height / 2);
 }
 
-- (UIViewController*) activeViewController {
+- (UIViewController *)activeViewController {
+#if TARGET_OS_VISION
+    // Get the active scene
+    UIWindowScene *activeScene = nil;
+    for (UIScene *scene in [UIApplication sharedApplication].connectedScenes) {
+        if ([scene isKindOfClass:[UIWindowScene class]] && scene.activationState == UISceneActivationStateForegroundActive) {
+            activeScene = (UIWindowScene *)scene;
+            break;
+        }
+    }
+    
+    UIViewController *topController = activeScene ? activeScene.windows.firstObject.rootViewController : nil;
+#else
     UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
+#endif
     
     while (topController.presentedViewController) {
         topController = topController.presentedViewController;

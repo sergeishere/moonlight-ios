@@ -8,7 +8,13 @@
 
 #import "AppAssetRetriever.h"
 #import "HttpManager.h"
-#import "CryptoManager.h"
+#if __has_include("Moonlight-Swift.h")
+#import "Moonlight-Swift.h"
+#elif __has_include("Moonlight_TV-Swift.h")
+#import "Moonlight_TV-Swift.h"
+#elif __has_include("Moonlight_Vision-Swift.h")
+#import "Moonlight_Vision-Swift.h"
+#endif
 #import "AppAssetResponse.h"
 #import "HttpRequest.h"
 #import "IdManager.h"

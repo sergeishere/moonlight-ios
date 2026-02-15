@@ -15,6 +15,9 @@ final class HostListViewModel {
     var loadingApps = false
     var streamConfig: StreamConfiguration?
 
+    @ObservationIgnored
+    private var pairingTask: Task<Void, Never>?
+
     init() {
         self.discoveryService = DiscoveryService()
         self.pairingService = PairingService()
@@ -190,21 +193,36 @@ final class HostListViewModel {
     func pairHost(_ host: Host) async {
         discoveryService.stopDiscoveryBlocking()
 
-        do {
-            let serverCert = try await pairingService.pair(host: host)
-            host.serverCert = serverCert
-            host.pairState = Int(PairState.paired.rawValue)
-            discoveryService.saveContext()
-        } catch PairingError.alreadyPaired {
-            // Already paired, just refresh
-        } catch PairingError.cancelled {
-            // User cancelled, no action needed
-        } catch {
-            errorMessage = error.localizedDescription
-            showError = true
+        let task = Task {
+            do {
+                try Task.checkCancellation()
+                let serverCert = try await pairingService.pair(host: host)
+                host.serverCert = serverCert
+                host.pairState = Int(PairState.paired.rawValue)
+                discoveryService.saveContext()
+            } catch is CancellationError {
+                // User cancelled via WebView dismiss or task cancellation
+            } catch let urlError as URLError where urlError.code == .cancelled {
+                // Network request cancelled
+            } catch PairingError.alreadyPaired {
+                // Already paired, just refresh
+            } catch PairingError.cancelled {
+                // User cancelled, no action needed
+            } catch {
+                errorMessage = error.localizedDescription
+                showError = true
+            }
         }
+        pairingTask = task
+        await task.value
+        pairingTask = nil
 
         discoveryService.startDiscovery()
         await updateHost(host)
+    }
+
+    func cancelWebViewPairing() {
+        pairingTask?.cancel()
+        pairingService.cancelPairing()
     }
 }

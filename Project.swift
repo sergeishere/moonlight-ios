@@ -47,6 +47,8 @@ let moonlightApp = Target.target(
         "LSApplicationCategoryType": "public.app-category.games",
         "NSAppTransportSecurity": [
             "NSAllowsArbitraryLoads": true,
+            "NSAllowsArbitraryLoadsInWebContent": true,
+            "NSAllowsLocalNetworking": true,
         ],
         "NSBluetoothAlwaysUsageDescription":
             "Bluetooth access allows Moonlight to connect to Citrix X1 mice.",

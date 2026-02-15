@@ -248,6 +248,7 @@ final class DiscoveryService {
         pollers[host.uuid] = poller
 
         let addresses = getAddressList(for: host)
+        let httpsPort = host.httpsPort
         let serverCert = host.serverCert
         let hostUUID = host.uuid
         let hostName = host.name
@@ -257,6 +258,7 @@ final class DiscoveryService {
         Task {
             await poller.startPolling(
                 addresses: addresses,
+                httpsPort: httpsPort,
                 serverCert: serverCert,
                 onResult: { [weak self] result in
                     guard let self else { return }

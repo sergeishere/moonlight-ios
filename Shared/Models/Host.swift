@@ -26,6 +26,7 @@ final class Host {
     @Transient var currentGame: String = "0"
     @Transient var httpsPort: UInt16 = 0
     @Transient var isNvidiaServerSoftware: Bool = false
+    @Transient var astrumVersion: Int = 0
     @Transient var updatePending: Bool = false
 
     // MARK: - Init
@@ -43,6 +44,7 @@ final class Host {
     var isPaired: Bool { pairState == Int(PairState.paired.rawValue) }
     var isOnline: Bool { state == Int(HostState.online.rawValue) }
     var isStatusUnknown: Bool { state == Int(HostState.unknown.rawValue) }
+    var isAstrumServer: Bool { astrumVersion >= 1 }
 
     var bestAddress: String? {
         activeAddress ?? localAddress ?? externalAddress ?? address ?? ipv6Address
@@ -104,11 +106,13 @@ final class Host {
         }
 
         isNvidiaServerSoftware = info.isNvidiaServerSoftware
+        astrumVersion = info.astrumVersion ?? 0
 
-        // Pair status
+        // Pair status: don't downgrade to unpaired if we have a server cert
+        // (local proof of successful pairing — server may not report paired over HTTP)
         if info.isPaired {
             pairState = Int(PairState.paired.rawValue)
-        } else {
+        } else if serverCert == nil {
             pairState = Int(PairState.unpaired.rawValue)
         }
 

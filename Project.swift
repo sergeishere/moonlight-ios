@@ -130,6 +130,7 @@ let moonlightApp = Target.target(
                 "$(SRCROOT)/Limelight/Network",
                 "$(SRCROOT)/Limelight/Database",
                 "$(SRCROOT)/Limelight/ViewControllers",
+                "$(SRCROOT)/Shared/Audio",
             ],
             "OTHER_LDFLAGS": [
                 "$(inherited)",

@@ -9,12 +9,10 @@
 #import "Connection.h"
 #import "Utils.h"
 
-#import "Moonlight-Swift.h"
 #import <VideoToolbox/VideoToolbox.h>
-#import "AVFoundation/AVFoundation.h"
 
 #include "Limelight.h"
-#include "opus_multistream.h"
+#import "AudioRenderer.h"
 
 @implementation Connection {
     SERVER_INFORMATION _serverInfo;
@@ -35,16 +33,6 @@ static int activeVideoFormat;
 static video_stats_t currentVideoStats;
 static video_stats_t lastVideoStats;
 static NSLock* videoStatsLock;
-
-//static OpusMSDecoder* opusDecoder;
-//static OPUS_MULTISTREAM_CONFIGURATION audioConfig;
-//static AVAudioEngine* audioEngine;
-//static AVAudioEnvironmentNode* environmentNode;
-//static AVAudioPlayerNode* audioPlayerNode;
-//static AVAudioFormat* audioFormat;
-static AVAudioPCMBuffer *pcmBuffer;
-static void* audioBuffer;
-static int audioFrameSize;
 
 static VideoDecoderRenderer* renderer;
 
@@ -189,141 +177,6 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
                              bufferType:BUFFER_TYPE_PICDATA
                              decodeUnit:decodeUnit];
 }
-
-//int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, void* context, int flags)
-//{
-//    int err;
-//    audioConfig = *opusConfig;
-//    audioFrameSize = opusConfig->samplesPerFrame * sizeof(short) * opusConfig->channelCount;
-//    audioBuffer = malloc(audioFrameSize);
-//    
-//    if (audioBuffer == NULL) {
-//        Log(LOG_E, @"Failed to allocate audio frame buffer");
-//        ArCleanup();
-//        return -1;
-//    }
-//    
-//    opusDecoder = opus_multistream_decoder_create(opusConfig->sampleRate,
-//                                                  opusConfig->channelCount,
-//                                                  opusConfig->streams,
-//                                                  opusConfig->coupledStreams,
-//                                                  opusConfig->mapping,
-//                                                  &err);
-//    if (opusDecoder == NULL) {
-//        Log(LOG_E, @"Failed to create Opus decoder");
-//        ArCleanup();
-//        return -1;
-//    }
-//    
-////    success = [session setPreferredSampleRate:48000 error:&sessionError];
-////    if (!success) {
-////        NSLog(@"Unable to set preferred sample rate: %@", sessionError.localizedDescription);
-////        return -1;
-////    }
-//    
-//    audioEngine = [[AVAudioEngine alloc] init];
-//    audioPlayerNode = [[AVAudioPlayerNode alloc] init];
-//    environmentNode = [[AVAudioEnvironmentNode alloc] init];
-//    
-//    audioFormat = [[AVAudioFormat alloc] initWithCommonFormat:AVAudioPCMFormatInt16
-//                                                   sampleRate:opusConfig->sampleRate
-//                                                     channels:opusConfig->channelCount
-//                                                  interleaved:YES];
-//    
-//    if (!audioFormat) {
-//        Log(LOG_E, @"Unable to create audio format");
-//        return -1;
-//    }
-//    
-//    AVAudioPCMBuffer *pcmBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:audioFormat
-//                                                                frameCapacity:audioConfig.samplesPerFrame];
-//    if (!pcmBuffer) {
-//        NSLog(@"Could not init pcm buffer");
-//    }
-//    
-////    [audioEngine prepare];
-////    [audioEngine connect:audioPlayerNode to:environmentNode format:NULL];
-////    [audioEngine connect:environmentNode to:audioEngine.mainMixerNode format:NULL];
-////    [audioEngine connect:audioEngine.mainMixerNode to: audioEngine.outputNode format:NULL];
-//    
-//    [audioEngine attachNode:audioPlayerNode];
-//    AVAudioFormat *outputFormat = [audioEngine.mainMixerNode outputFormatForBus:0];
-//    [audioEngine connect:audioPlayerNode to:audioEngine.mainMixerNode format:outputFormat];
-//    
-////    [environmentNode setListenerPosition:AVAudioMake3DPoint(0, 0, 0)];
-//    
-//    NSError *error = nil;
-//    if (![audioEngine startAndReturnError:&error]) {
-//        NSLog(@"Unable to start audio engine: %@", error);
-//        return -1;
-//    }
-//    [audioPlayerNode play];
-//    
-//    NSError* sessionError;
-//    AVAudioSession* session = [AVAudioSession sharedInstance];
-//    BOOL success = [session setCategory:session.category
-//                            withOptions:AVAudioSessionCategoryOptionMixWithOthers error:&sessionError];
-//    if (success == NO) {
-//        Log(LOG_E, @"Unable to set AVAudioSession category");
-//    }
-////    [session setActive:YES error:NULL];
-//    
-//    return 0;
-//}
-//
-//void ArCleanup(void)
-//{
-//    if (opusDecoder != NULL) {
-//        opus_multistream_decoder_destroy(opusDecoder);
-//        opusDecoder = NULL;
-//    }
-//    
-//    if (audioEngine != 0) {
-//        [audioEngine stop];
-//        audioEngine = NULL;
-//    }
-//    
-//    if (audioPlayerNode != 0) {
-//        audioPlayerNode = NULL;
-//    }
-//    
-//    if (environmentNode != 0) {
-//        environmentNode = NULL;
-//    }
-//    
-//    if (audioBuffer != NULL) {
-//        free(audioBuffer);
-//        audioBuffer = NULL;
-//    }
-//}
-//
-//void ArDecodeAndPlaySample(char* sampleData, int sampleLength)
-//{
-//    int decodeLen;
-//    
-//    // Don't queue if there's already more than 30 ms of audio data waiting
-//    // in Moonlight's audio queue.
-//    if (LiGetPendingAudioDuration() > 30) {
-//        return;
-//    }
-//    
-//    NSLog(@"ArDecodeAndPlaySample");
-//    
-//    decodeLen = opus_multistream_decode(opusDecoder,
-//                                        (unsigned char *)sampleData,
-//                                        sampleLength,
-//                                        (short*)pcmBuffer.int16ChannelData,
-//                                        audioConfig.samplesPerFrame,
-//                                        0);
-//    
-//    if (decodeLen > 0) {
-//        pcmBuffer.frameLength = decodeLen;
-//        [audioPlayerNode scheduleBuffer:pcmBuffer
-//                                 atTime:NULL
-//                                options:AVAudioPlayerNodeBufferInterrupts
-//                      completionHandler:nil];
-//    }
-//}
 
 void ClStageStarting(int stage)
 {
@@ -488,10 +341,12 @@ void ClSetControllerLED(uint16_t controllerNumber, uint8_t r, uint8_t g, uint8_t
                                 CAPABILITY_REFERENCE_FRAME_INVALIDATION_AV1;
 
     LiInitializeAudioCallbacks(&_arCallbacks);
-    _arCallbacks.init = ArInit;
-    _arCallbacks.cleanup = ArCleanup;
-    _arCallbacks.decodeAndPlaySample = ArDecodeAndPlaySample;
-    _arCallbacks.capabilities = CAPABILITY_SUPPORTS_ARBITRARY_AUDIO_DURATION;
+    _arCallbacks.init = AudioRenderer_Init;
+    _arCallbacks.start = AudioRenderer_Start;
+    _arCallbacks.stop = AudioRenderer_Stop;
+    _arCallbacks.cleanup = AudioRenderer_Cleanup;
+    _arCallbacks.decodeAndPlaySample = AudioRenderer_DecodeAndPlaySample;
+    _arCallbacks.capabilities = CAPABILITY_DIRECT_SUBMIT | CAPABILITY_SUPPORTS_ARBITRARY_AUDIO_DURATION;
 
     LiInitializeConnectionCallbacks(&_clCallbacks);
     _clCallbacks.stageStarting = ClStageStarting;

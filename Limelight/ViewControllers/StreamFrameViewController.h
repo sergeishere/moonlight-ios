@@ -6,6 +6,10 @@
 //  Copyright (c) 2015 Moonlight Stream. All rights reserved.
 //
 
+#include <TargetConditionals.h>
+
+#if !TARGET_OS_VISION
+
 #import "Connection.h"
 #import "StreamConfiguration.h"
 #import "StreamView.h"
@@ -24,3 +28,5 @@
 -(void)updatePreferredDisplayMode:(BOOL)streamActive;
 
 @end
+
+#endif // !TARGET_OS_VISION

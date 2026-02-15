@@ -13,6 +13,7 @@ final class HostListViewModel {
     var selectedHost: Host?
     var apps: [App] = []
     var loadingApps = false
+    var streamConfig: StreamConfiguration?
 
     init() {
         self.discoveryService = DiscoveryService()
@@ -127,6 +128,52 @@ final class HostListViewModel {
         }
         apps = updatedApps
         loadingApps = false
+    }
+
+    // MARK: - Streaming
+
+    #if !os(visionOS)
+    func launchApp(_ app: App, host: Host, settings: StreamSettings) {
+        let config = StreamConfiguration()
+        config.host = host.bestAddress
+        config.httpsPort = host.httpsPort
+        config.appID = app.id
+        config.appName = app.name
+        config.width = settings.width
+        config.height = settings.height
+        config.frameRate = settings.framerate
+        config.bitRate = settings.bitrate * 1000
+        config.audioConfiguration = settings.audioConfig
+        config.optimizeGameSettings = settings.optimizeGames
+        config.multiController = settings.multiController
+        config.swapABXYButtons = settings.swapABXYButtons
+        config.playAudioOnPC = settings.playAudioOnPC
+        config.useFramePacing = settings.useFramePacing
+        config.serverCert = host.serverCert
+        config.serverCodecModeSupport = host.serverCodecModeSupport
+
+        var supportedVideoFormats: Int32 = 0x0001 // H.264
+        let codec = settings.codec
+        if codec == .auto || codec == .hevc {
+            supportedVideoFormats |= 0x0100 // HEVC
+            if settings.enableHdr {
+                supportedVideoFormats |= 0x0200 // HEVC HDR
+            }
+        }
+        if codec == .auto || codec == .av1 {
+            supportedVideoFormats |= 0x1000 // AV1
+            if settings.enableHdr {
+                supportedVideoFormats |= 0x2000 // AV1 HDR
+            }
+        }
+        config.supportedVideoFormats = supportedVideoFormats
+
+        streamConfig = config
+    }
+    #endif
+
+    func endStream() {
+        streamConfig = nil
     }
 
     // MARK: - Pairing

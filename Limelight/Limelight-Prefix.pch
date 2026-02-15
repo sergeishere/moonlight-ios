@@ -20,6 +20,5 @@
     #import <AppKit/AppKit.h>
 #endif
 #import <Foundation/Foundation.h>
-#import <CoreData/CoreData.h>
 #import "Logger.h"
 #endif

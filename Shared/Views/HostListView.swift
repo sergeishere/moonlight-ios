@@ -1,11 +1,13 @@
 import SwiftUI
 import SwiftData
+import AVFoundation
 
 struct HostListView: View {
     @Environment(\.modelContext) private var modelContext
     @State var viewModel = HostListViewModel()
 
     @State private var showingAddHost = false
+    @State private var showingSettings = false
     @State private var hostToDelete: Host?
     @State private var showDeleteConfirmation = false
     @State private var hostForInfo: Host?
@@ -36,6 +38,11 @@ struct HostListView: View {
                         }
                     }
                 }
+                ToolbarItem(placement: .navigation) {
+                    Button("Settings", systemImage: "gearshape") {
+                        showingSettings = true
+                    }
+                }
             }
         }
         .task {
@@ -43,6 +50,22 @@ struct HostListView: View {
             await viewModel.reconnectLastHost()
         }
         .onDisappear { viewModel.stopDiscovery() }
+        .sheet(isPresented: $showingSettings) {
+            SettingsView()
+        }
+        #if !os(visionOS)
+        .fullScreenCover(isPresented: Binding(
+            get: { viewModel.streamConfig != nil },
+            set: { if !$0 { viewModel.endStream() } }
+        )) {
+            if let config = viewModel.streamConfig {
+                StreamContainerView(config: config)
+                    .ignoresSafeArea()
+                    .statusBarHidden(true)
+                    .persistentSystemOverlays(.hidden)
+            }
+        }
+        #endif
     }
 
     // MARK: - Host Picker
@@ -167,7 +190,12 @@ struct HostListView: View {
                 ScrollView(.horizontal) {
                     HStack(spacing: 20) {
                         ForEach(viewModel.apps, id: \.id) { app in
-                            AppCardView(app: app)
+                            Button {
+                                launchStream(app: app)
+                            } label: {
+                                AppCardView(app: app)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                     .frame(maxHeight: .infinity)
@@ -211,6 +239,18 @@ struct HostListView: View {
             Label("Delete", systemImage: "trash")
         }
     }
+
+    // MARK: - Streaming
+
+    private func launchStream(app: App) {
+        #if !os(visionOS)
+        guard let host = viewModel.selectedHost else { return }
+        let settings = allSettings.first ?? StreamSettings()
+        viewModel.launchApp(app, host: host, settings: settings)
+        #endif
+    }
+
+    @Query private var allSettings: [StreamSettings]
 
     // MARK: - Helpers
 

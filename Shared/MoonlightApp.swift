@@ -4,7 +4,7 @@ import AVFoundation
 
 @main
 struct MoonlightApp: SwiftUI.App {
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         configureAudioSession()
@@ -18,6 +18,7 @@ struct MoonlightApp: SwiftUI.App {
     }
 
     private func configureAudioSession() {
+        #if !os(visionOS)
         let session = AVAudioSession.sharedInstance()
         do {
             try session.setCategory(.playback, options: .mixWithOthers)
@@ -25,5 +26,6 @@ struct MoonlightApp: SwiftUI.App {
         } catch {
             print("Failed to configure audio session: \(error)")
         }
+        #endif
     }
 }

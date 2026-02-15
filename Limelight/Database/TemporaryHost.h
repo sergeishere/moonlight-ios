@@ -7,7 +7,6 @@
 //
 
 #import "Utils.h"
-#import "Host+CoreDataClass.h"
 
 @interface TemporaryHost : NSObject
 
@@ -32,11 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (atomic, retain) NSString *uuid;
 @property (atomic, retain) NSSet *appList;
 
-- (id) initFromHost:(Host*)host;
-
 - (NSComparisonResult)compareName:(TemporaryHost *)other;
-
-- (void) propagateChangesToParent:(Host*)host;
 
 NS_ASSUME_NONNULL_END
 

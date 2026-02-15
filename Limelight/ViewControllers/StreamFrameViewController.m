@@ -6,12 +6,14 @@
 //  Copyright (c) 2015 Moonlight Stream. All rights reserved.
 //
 
+#if !TARGET_OS_VISION
+
 #import "StreamFrameViewController.h"
-#import "MainFrameViewController.h"
 #import "VideoDecoderRenderer.h"
 #import "StreamManager.h"
 #import "ControllerSupport.h"
 #import "DataManager.h"
+#import "Utils.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -57,10 +59,6 @@
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    
-#if !TARGET_OS_TV
-    [[self revealViewController] setPrimaryViewController:self];
-#endif
 }
 
 #if TARGET_OS_TV
@@ -723,3 +721,5 @@
 #endif
 
 @end
+
+#endif // !TARGET_OS_VISION

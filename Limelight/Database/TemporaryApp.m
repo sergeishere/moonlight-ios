@@ -3,32 +3,12 @@
 //  Moonlight
 //
 //  Created by Cameron Gutman on 9/30/15.
-//  Copyright © 2015 Moonlight Stream. All rights reserved.
+//  Copyright (c) 2015 Moonlight Stream. All rights reserved.
 //
 
 #import "TemporaryApp.h"
 
 @implementation TemporaryApp
-
-- (id) initFromApp:(App*)app withTempHost:(TemporaryHost*)tempHost {
-    self = [self init];
-    
-    self.id = app.id;
-    self.name = app.name;
-    self.hdrSupported = app.hdrSupported;
-    self.hidden = app.hidden;
-    self.host = tempHost;
-    
-    return self;
-}
-
-- (void) propagateChangesToParent:(App*)parent withHost:(Host*)host {
-    parent.id = self.id;
-    parent.name = self.name;
-    parent.hdrSupported = self.hdrSupported;
-    parent.hidden = self.hidden;
-    parent.host = host;
-}
 
 - (NSComparisonResult)compareName:(TemporaryApp *)other {
     return [self.name caseInsensitiveCompare:other.name];
@@ -42,13 +22,14 @@
     if (self == object) {
         return YES;
     }
-    
-    if (![object isKindOfClass:[self class]]) {
+
+    if (![object isKindOfClass:[TemporaryApp class]]) {
         return NO;
     }
-    
-    return [self.host.uuid isEqualToString:((App*)object).host.uuid] &&
-    [self.id isEqualToString:((App*)object).id];
+
+    TemporaryApp *other = (TemporaryApp *)object;
+    return [self.host.uuid isEqualToString:other.host.uuid] &&
+           [self.id isEqualToString:other.id];
 }
 
 @end

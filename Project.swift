@@ -70,6 +70,8 @@ let moonlightApp = Target.target(
         "Shared/**",
         // Streaming
         "Limelight/Stream/**",
+        // Metal video pipeline
+        "Limelight/Metal/**",
         // Input handling
         "Limelight/Input/**",
         // Crypto
@@ -112,6 +114,9 @@ let moonlightApp = Target.target(
         .sdk(name: "GameController", type: .framework),
         .sdk(name: "Security", type: .framework),
         .sdk(name: "VideoToolbox", type: .framework),
+        .sdk(name: "Metal", type: .framework),
+        .sdk(name: "MetalKit", type: .framework),
+        .sdk(name: "QuartzCore", type: .framework),
     ],
     settings: .settings(
         base: [
@@ -131,6 +136,7 @@ let moonlightApp = Target.target(
                 "$(SRCROOT)/Limelight/Database",
                 "$(SRCROOT)/Limelight/ViewControllers",
                 "$(SRCROOT)/Shared/Audio",
+                "$(SRCROOT)/Limelight/Metal",
             ],
             "OTHER_LDFLAGS": [
                 "$(inherited)",

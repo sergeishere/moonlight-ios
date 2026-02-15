@@ -9,12 +9,23 @@
 @import AVFoundation;
 
 #import "ConnectionCallbacks.h"
+#import "FrameQueue.h"
+#import "Plot.h"
 
 #include "Limelight.h"
 
 @interface VideoDecoderRenderer : NSObject
 
-- (id)initWithCallbacks:(id<ConnectionCallbacks>)callbacks sampleBufferVideoRenderer:(AVSampleBufferVideoRenderer*)renderer streamAspectRatio:(float)aspectRatio useFramePacing:(BOOL)useFramePacing;
+#if TARGET_OS_VISION
+- (id)initWithCallbacks:(id<ConnectionCallbacks>)callbacks
+    sampleBufferVideoRenderer:(AVSampleBufferVideoRenderer*)renderer
+            streamAspectRatio:(float)aspectRatio
+               useFramePacing:(BOOL)useFramePacing;
+#else
+- (id)initWithCallbacks:(id<ConnectionCallbacks>)callbacks
+             frameQueue:(FrameQueue *)frameQueue
+      streamAspectRatio:(float)aspectRatio;
+#endif
 
 - (void)setupWithVideoFormat:(int)videoFormat width:(int)videoWidth height:(int)videoHeight frameRate:(int)frameRate;
 - (void)start;

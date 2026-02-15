@@ -5,17 +5,10 @@ import Foundation
 final class PairingService {
     var isPairing = false
     var currentPin = ""
+    var isWebViewPairing = false
+    var webViewURL: URL?
 
     func pair(host: Host) async throws -> Data {
-        let pin = PairingClient.generatePin()
-        isPairing = true
-        currentPin = pin
-
-        defer {
-            isPairing = false
-            currentPin = ""
-        }
-
         // Check if already paired
         let preClient = MoonlightClient(host: host)
         do {
@@ -29,10 +22,68 @@ final class PairingService {
             // Continue with pairing even if serverInfo check fails
         }
 
+        #if os(tvOS)
+        return try await pairWithPin(host: host)
+        #else
+        if host.isAstrumServer {
+            return try await pairWithWebView(host: host)
+        } else {
+            return try await pairWithPin(host: host)
+        }
+        #endif
+    }
+
+    func cancelPairing() {
+        isPairing = false
+        isWebViewPairing = false
+        webViewURL = nil
+        currentPin = ""
+    }
+
+    // MARK: - PIN Pairing (standard Sunshine/GFE)
+
+    private func pairWithPin(host: Host) async throws -> Data {
+        let pin = PairingClient.generatePin()
+        isPairing = true
+        currentPin = pin
+
+        defer {
+            isPairing = false
+            currentPin = ""
+        }
+
+        return try await performPairingHandshake(host: host, pin: pin)
+    }
+
+    // MARK: - WebView Pairing (Astrum servers)
+
+    private func pairWithWebView(host: Host) async throws -> Data {
+        let pin = PairingClient.generatePin()
+
+        let (address, port) = host.bestAddress.map { AddressUtils.parseAddressAndPort($0) } ?? ("", 47989)
+        let configPort = port + 1
+
+        guard let url = URL(string: "https://\(address):\(configPort)/pair-webview#pin=\(pin)") else {
+            throw PairingError.failed("Failed to construct WebView pairing URL")
+        }
+
+        isWebViewPairing = true
+        webViewURL = url
+
+        defer {
+            isWebViewPairing = false
+            webViewURL = nil
+        }
+
+        return try await performPairingHandshake(host: host, pin: pin)
+    }
+
+    // MARK: - Shared Handshake
+
+    private func performPairingHandshake(host: Host, pin: String) async throws -> Data {
         let (address, port) = host.bestAddress.map { AddressUtils.parseAddressAndPort($0) } ?? ("", 47989)
         let httpsPort = host.httpsPort != 0 ? host.httpsPort : 47984
 
-        // HTTP client for phases 1-4 (no server cert)
         let pairingClient = MoonlightClient(
             address: address,
             port: port,
@@ -54,11 +105,6 @@ final class PairingService {
         )
 
         return serverCert
-    }
-
-    func cancelPairing() {
-        isPairing = false
-        currentPin = ""
     }
 }
 

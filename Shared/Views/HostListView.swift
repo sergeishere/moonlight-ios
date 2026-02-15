@@ -163,13 +163,25 @@ struct HostListView: View {
         .sheet(item: $hostForInfo) { host in
             HostInfoView(host: host)
         }
-        .alert("Enter PIN", isPresented: $viewModel.pairingService.isPairing) {
+        .alert("Enter PIN", isPresented: Binding(
+            get: { viewModel.pairingService.isPairing && !viewModel.pairingService.isWebViewPairing },
+            set: { if !$0 { viewModel.pairingService.cancelPairing() } }
+        )) {
             Button("Cancel", role: .cancel) {
                 viewModel.pairingService.cancelPairing()
             }
         } message: {
             Text("Enter the following PIN on your host PC:\n\(viewModel.pairingService.currentPin)")
         }
+        #if !os(tvOS)
+        .sheet(isPresented: $viewModel.pairingService.isWebViewPairing) {
+            if let url = viewModel.pairingService.webViewURL {
+                PairingWebView(url: url, onCancel: {
+                    viewModel.cancelWebViewPairing()
+                })
+            }
+        }
+        #endif
     }
 
     // MARK: - App Grid

@@ -16,6 +16,7 @@ struct ServerInfo: Decodable {
     let gfeVersion: String?
     let maxLumaPixelsHEVC: Int?
     let supportedDisplayModes: [DisplayMode]?
+    let astrumVersion: Int?
 
     enum CodingKeys: String, CodingKey {
         case hostname, mac, state
@@ -31,6 +32,7 @@ struct ServerInfo: Decodable {
         case gfeVersion = "GfeVersion"
         case maxLumaPixelsHEVC = "MaxLumaPixelsHEVC"
         case supportedDisplayModes = "SupportedDisplayMode"
+        case astrumVersion = "AstrumVersion"
     }
 
     struct DisplayMode: Decodable {
@@ -46,6 +48,10 @@ struct ServerInfo: Decodable {
     }
 
     // MARK: - Derived properties
+
+    var isAstrumServer: Bool {
+        (astrumVersion ?? 0) >= 1
+    }
 
     var isServerBusy: Bool {
         state.hasSuffix("_SERVER_BUSY")

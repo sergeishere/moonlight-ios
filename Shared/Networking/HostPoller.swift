@@ -19,18 +19,20 @@ actor HostPoller {
     /// Stops automatically after `maxConsecutiveFailures` consecutive failures.
     func startPolling(
         addresses: [String],
+        httpsPort: UInt16,
         serverCert: Data?,
         onResult: @MainActor @Sendable @escaping (PollResult) -> Void,
         onStoppedByFailures: @MainActor @Sendable @escaping () -> Void
     ) {
         stopPolling()
 
-        pollingTask = Task { [addresses, serverCert] in
+        pollingTask = Task { [addresses, httpsPort, serverCert] in
             var consecutiveFailures = 0
 
             while !Task.isCancelled {
                 if let result = await Self.poll(
                     addresses: addresses,
+                    httpsPort: httpsPort,
                     serverCert: serverCert
                 ) {
                     consecutiveFailures = 0
@@ -60,6 +62,7 @@ actor HostPoller {
     /// Tries LAN addresses first (fast timeout), then WAN.
     static func poll(
         addresses: [String],
+        httpsPort: UInt16 = 0,
         serverCert: Data?
     ) async -> PollResult? {
         // Sort: LAN addresses first for fastest response
@@ -77,7 +80,7 @@ actor HostPoller {
             let client = MoonlightClient(
                 address: addr,
                 port: port,
-                httpsPort: 0,
+                httpsPort: httpsPort,
                 serverCert: serverCert
             )
 

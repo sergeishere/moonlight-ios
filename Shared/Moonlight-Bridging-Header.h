@@ -18,8 +18,6 @@
 
 #import "Limelight.h"
 
-#if TARGET_OS_VISION
-#import "VisionStreamViewController.h"
-#else
-#import "StreamFrameViewController.h"
+#if !TARGET_OS_VISION
+#import "MetalViewController.h"
 #endif

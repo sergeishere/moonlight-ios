@@ -1,8 +1,8 @@
 import Foundation
 
-@objc final class StreamSession: NSObject, @unchecked Sendable {
-    @objc let config: StreamConfiguration
-    @objc private(set) var connection: MoonlightConnection?
+final class StreamSession: @unchecked Sendable {
+    let config: StreamConfiguration
+    private(set) var connection: MoonlightConnection?
     private let delegate: any StreamConnectionDelegate
 
     #if os(visionOS)
@@ -12,26 +12,24 @@ import Foundation
     #endif
 
     #if os(visionOS)
-    @objc init(config: StreamConfiguration, videoRenderer: AVSampleBufferVideoRenderer, delegate: any StreamConnectionDelegate) {
+    init(config: StreamConfiguration, videoRenderer: AVSampleBufferVideoRenderer, delegate: any StreamConnectionDelegate) {
         self.config = config
         self.videoRenderer = videoRenderer
         self.delegate = delegate
-        super.init()
         config.riKey = Utils.randomBytes(16)
         config.riKeyId = Int32(arc4random())
     }
     #else
-    @objc init(config: StreamConfiguration, frameQueue: FrameQueue, delegate: any StreamConnectionDelegate) {
+    init(config: StreamConfiguration, frameQueue: FrameQueue, delegate: any StreamConnectionDelegate) {
         self.config = config
         self.frameQueue = frameQueue
         self.delegate = delegate
-        super.init()
         config.riKey = Utils.randomBytes(16)
         config.riKeyId = Int32(arc4random())
     }
     #endif
 
-    @objc func start() {
+    func start() {
         StreamCallbackRouter.shared.delegate = delegate
 
         Task {
@@ -43,7 +41,7 @@ import Foundation
         }
     }
 
-    @objc func stop() {
+    func stop() {
         connection?.terminate()
     }
 

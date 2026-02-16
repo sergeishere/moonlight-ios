@@ -6,8 +6,8 @@ import GameController
 
 private let logger = Logger(subsystem: "Moonlight", category: "StreamView")
 
-@objc(UserInteractionDelegate)
-protocol UserInteractionDelegate: NSObjectProtocol {
+@MainActor
+protocol UserInteractionDelegate: AnyObject {
     func userInteractionBegan()
     func userInteractionEnded()
 }
@@ -56,9 +56,9 @@ class StreamView: UIView, UITextFieldDelegate {
 
     // MARK: - Setup
 
-    @objc func setupStreamView(_ controllerSupport: ControllerSupport,
-                                interactionDelegate: any UserInteractionDelegate,
-                                config streamConfig: StreamConfiguration) {
+    func setupStreamView(_ controllerSupport: ControllerSupport,
+                          interactionDelegate: any UserInteractionDelegate,
+                          config streamConfig: StreamConfiguration) {
         self.interactionDelegate = interactionDelegate
         self.streamAspectRatio = Float(streamConfig.width) / Float(streamConfig.height)
 

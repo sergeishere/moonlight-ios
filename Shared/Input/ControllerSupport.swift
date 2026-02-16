@@ -6,7 +6,7 @@ private let EMULATING_SELECT: Int32 = 0x1
 private let EMULATING_SPECIAL: Int32 = 0x2
 private let MOUSE_SPEED_DIVISOR: Float = 1.25
 
-@objc protocol ControllerSupportDelegate: AnyObject {
+protocol ControllerSupportDelegate: AnyObject {
     func gamepadPresenceChanged()
     func mousePresenceChanged()
     func streamExitRequested()
@@ -38,7 +38,7 @@ private let MOUSE_SPEED_DIVISOR: Float = 1.25
     private var keyboardConnectObserver: (any NSObjectProtocol)?
     private var keyboardDisconnectObserver: (any NSObjectProtocol)?
 
-    @objc init(config streamConfig: StreamConfiguration, delegate: any ControllerSupportDelegate) {
+    init(config streamConfig: StreamConfiguration, delegate: any ControllerSupportDelegate) {
         self.multiController = streamConfig.multiController
         self.swapABXYButtons = streamConfig.swapABXYButtons
         self.delegate = delegate

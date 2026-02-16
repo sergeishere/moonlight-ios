@@ -1,6 +1,6 @@
 import Foundation
 
-@objc protocol StreamConnectionDelegate: AnyObject {
+protocol StreamConnectionDelegate: AnyObject {
     func connectionStarted()
     func connectionTerminated(_ errorCode: Int32)
     func stageStarting(_ stageName: UnsafePointer<CChar>)

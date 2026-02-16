@@ -14,6 +14,7 @@
 
 @implementation MetalView {
     NSThread *_renderThread;
+    CAMetalLayer *_cachedMetalLayer;
     BOOL _running;
 }
 
@@ -22,22 +23,22 @@
 }
 
 - (id)metalLayer {
-    return (CAMetalLayer *)self.layer;
+    return _cachedMetalLayer;
 }
 
 - (CAMetalLayer *)_metalLayer {
-    return (CAMetalLayer *)self.layer;
+    return _cachedMetalLayer;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        CAMetalLayer *layer = [self _metalLayer];
+        _cachedMetalLayer = (CAMetalLayer *)self.layer;
         self.backgroundColor = [UIColor blackColor];
-        layer.device = MTLCreateSystemDefaultDevice();
-        layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-        layer.framebufferOnly = YES;
-        layer.presentsWithTransaction = NO;
+        _cachedMetalLayer.device = MTLCreateSystemDefaultDevice();
+        _cachedMetalLayer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+        _cachedMetalLayer.framebufferOnly = YES;
+        _cachedMetalLayer.presentsWithTransaction = NO;
     }
     return self;
 }
@@ -46,7 +47,7 @@
     [super layoutSubviews];
 
     CGFloat scale = self.window.screen.nativeScale;
-    [self _metalLayer].drawableSize = CGSizeMake(
+    _cachedMetalLayer.drawableSize = CGSizeMake(
         self.bounds.size.width * scale,
         self.bounds.size.height * scale
     );

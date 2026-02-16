@@ -77,40 +77,36 @@
     HttpManager* hMan = [[HttpManager alloc] initWithAddress:_config.host httpsPort:_config.httpsPort
                                                      serverCert:_config.serverCert];
 
-    ServerInfoResponse* serverInfoResp = [[ServerInfoResponse alloc] init];
-    [hMan executeRequestSynchronously:[HttpRequest requestForResponse:serverInfoResp withUrlRequest:[hMan newServerInfoRequest:false]
-                                       fallbackError:401 fallbackRequest:[hMan newHttpServerInfoRequest]]];
-    NSString* pairStatus = [serverInfoResp getStringTag:@"PairStatus"];
-    NSString* appversion = [serverInfoResp getStringTag:@"appversion"];
-    NSString* gfeVersion = [serverInfoResp getStringTag:@"GfeVersion"];
-    NSString* serverState = [serverInfoResp getStringTag:@"state"];
-    if (![serverInfoResp isStatusOk]) {
-        [_callbacks launchFailed:serverInfoResp.statusMessage];
-        return;
-    }
-    else if (pairStatus == NULL || appversion == NULL || serverState == NULL) {
-        [_callbacks launchFailed:@"Failed to connect to PC"];
-        return;
-    }
-
-    if (![pairStatus isEqualToString:@"1"]) {
-        [_callbacks launchFailed:@"Device not paired to PC"];
-        return;
-    }
-
-    if ((_config.width > 4096 || _config.height > 4096) && [serverState containsString:@"MJOLNIR"]) {
-        NSString* codecSupport = [serverInfoResp getStringTag:@"ServerCodecModeSupport"];
-        if (codecSupport == nil || !([codecSupport intValue] & 0x200)) {
-            [_callbacks launchFailed:@"Your host PC's GPU doesn't support streaming video resolutions over 4K."];
+    // Skip serverInfo request if app version was pre-filled from host discovery
+    if (_config.appVersion == nil) {
+        ServerInfoResponse* serverInfoResp = [[ServerInfoResponse alloc] init];
+        [hMan executeRequestSynchronously:[HttpRequest requestForResponse:serverInfoResp withUrlRequest:[hMan newServerInfoRequest:false]
+                                           fallbackError:401 fallbackRequest:[hMan newHttpServerInfoRequest]]];
+        NSString* pairStatus = [serverInfoResp getStringTag:@"PairStatus"];
+        NSString* appversion = [serverInfoResp getStringTag:@"appversion"];
+        NSString* gfeVersion = [serverInfoResp getStringTag:@"GfeVersion"];
+        NSString* serverState = [serverInfoResp getStringTag:@"state"];
+        if (![serverInfoResp isStatusOk]) {
+            [_callbacks launchFailed:serverInfoResp.statusMessage];
             return;
         }
+        else if (pairStatus == NULL || appversion == NULL || serverState == NULL) {
+            [_callbacks launchFailed:@"Failed to connect to PC"];
+            return;
+        }
+
+        if (![pairStatus isEqualToString:@"1"]) {
+            [_callbacks launchFailed:@"Device not paired to PC"];
+            return;
+        }
+
+        _config.appVersion = appversion;
+        _config.gfeVersion = gfeVersion;
+        _config.isResume = [serverState hasSuffix:@"_SERVER_BUSY"];
     }
 
-    _config.appVersion = appversion;
-    _config.gfeVersion = gfeVersion;
-
     NSString* sessionUrl;
-    if ([serverState hasSuffix:@"_SERVER_BUSY"]) {
+    if (_config.isResume) {
         if (![self resumeApp:hMan receiveSessionUrl:&sessionUrl]) {
             return;
         }

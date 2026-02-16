@@ -7,7 +7,9 @@ final class StreamSettings {
     var framerate: Int32 = 60
     var height: Int32 = 720
     var width: Int32 = 1280
-    var audioConfig: Int32 = 2
+    // Packed format: MAKE_AUDIO_CONFIGURATION(channelCount, channelMask) = (mask << 16) | (count << 8) | 0xCA
+    // Stereo: MAKE_AUDIO_CONFIGURATION(2, 0x3) = 0x000302CA
+    var audioConfig: Int32 = (0x3 << 16) | (2 << 8) | 0xCA
     var onscreenControls: Int32 = 1
     var preferredCodec: Int = PreferredCodec.auto.rawValue
     var useFramePacing: Bool = false

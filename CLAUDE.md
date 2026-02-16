@@ -6,23 +6,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Moonlight is an open-source game streaming client for iOS, tvOS, and visionOS. It connects to Sunshine/NVIDIA GameStream hosts to stream games over the network. The core streaming protocol is implemented in C (`moonlight-common-c` submodule), with platform UI in Objective-C (iOS/tvOS) and SwiftUI (visionOS).
 
-## Build Commands
+## Build System
 
-Build from command line (or use Xcode GUI with the corresponding scheme):
+The project uses **Tuist** (`Project.swift`) as the single source of build configuration.
+
 ```bash
-# iOS
+# Generate Xcode project
+tuist generate
+
+# Build iOS
 xcodebuild -scheme Moonlight -sdk iphoneos -configuration Debug
 
-# tvOS
-xcodebuild -scheme "Moonlight TV" -sdk appletvos -configuration Debug
-
-# visionOS
-xcodebuild -scheme "Moonlight Vision" -sdk xros -configuration Debug
-
-# Simulator variants
+# Build iOS Simulator
 xcodebuild -scheme Moonlight -sdk iphonesimulator -configuration Debug
-xcodebuild -scheme "Moonlight TV" -sdk appletvsimulator -configuration Debug
-xcodebuild -scheme "Moonlight Vision" -sdk xrsimulator -configuration Debug
 ```
 
 ## Setup Requirements
@@ -33,17 +29,9 @@ xcodebuild -scheme "Moonlight Vision" -sdk xrsimulator -configuration Debug
 
 ## Architecture
 
-### Platform Targets
-
-| Target | Platform | UI Framework | Min Deployment |
-|--------|----------|-------------|----------------|
-| Moonlight | iOS 12.0+ | UIKit + Storyboards | iPhone & iPad |
-| Moonlight TV | tvOS | UIKit | Apple TV |
-| Moonlight Vision | xrOS 1.2+ | SwiftUI + RealityKit | Apple Vision Pro |
-
 ### Layer Structure
 
-- **UI Layer**: `Limelight/ViewControllers/` (iOS/tvOS MVC with storyboards: iPhone.storyboard, iPad.storyboard), `Moonlight Vision/` (visionOS SwiftUI)
+- **UI Layer**: `Limelight/ViewControllers/` (iOS/tvOS MVC with storyboards: iPhone.storyboard, iPad.storyboard)
 - **Networking**: `Limelight/Network/` — host discovery (`DiscoveryManager`, `MDNSManager`), HTTP communication (`HttpManager`), pairing (`PairManager`), Wake-on-LAN
 - **Streaming**: `Limelight/Stream/` — `StreamManager` orchestrates sessions, `VideoDecoderRenderer` uses VideoToolbox for hardware decoding
 - **Input**: `Limelight/Input/` — game controller support (`ControllerSupport`), keyboard, touch (relative/absolute), haptics
@@ -53,9 +41,7 @@ xcodebuild -scheme "Moonlight Vision" -sdk xrsimulator -configuration Debug
 
 ### Obj-C / Swift Interop
 
-- iOS/tvOS are primarily Objective-C with bridging header at `Limelight/Input/Moonlight-Bridging-Header.h`
-- visionOS target uses Swift/SwiftUI, wrapping shared Obj-C classes via `Moonlight Vision/Moonlight-Bridging-Header.h`
-- `AppController` bridges Obj-C managers (like `DiscoveryManager`) to SwiftUI's `HostsController`
+- Bridging header: `Shared/Moonlight-Bridging-Header.h` (configured in `Project.swift`)
 
 ### Callback Pattern
 
@@ -70,7 +56,7 @@ Async operations use delegate/callback protocols extensively: `DiscoveryCallback
 
 ## Third-Party Libraries (in `libs/`)
 
-All are pre-compiled static libraries with per-platform slices (iphoneos, iphonesimulator, appletvos, appletvsimulator, xros, xrsimulator):
+All are pre-compiled static libraries with per-platform slices:
 - **SDL3** — as xcframework
 - **FFmpeg** — video codec support (libavutil, libavformat, libavcodec)
 - **Opus** — audio codec (libopus)
@@ -84,7 +70,6 @@ Library search paths are configured in `Configurations/paths.xcconfig`.
 
 ## Key Configuration Files
 
-- `Configurations/ios.xcconfig`, `tvos.xcconfig`, `visionos.xcconfig` — per-platform build settings
+- `Project.swift` — Tuist project definition (single source of truth for build config)
 - `Configurations/paths.xcconfig` — library and header search paths
 - `Configurations/credentials.xcconfig` — bundle ID and team (gitignored)
-- `Limelight/Limelight-Info.plist` — iOS/tvOS app config (Bonjour, Bluetooth, controllers)

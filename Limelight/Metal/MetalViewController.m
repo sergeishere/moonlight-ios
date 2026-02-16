@@ -57,11 +57,7 @@
 
     // Set up CADisplayLink for frame rate hinting
     _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkFired:)];
-    if (@available(iOS 15.0, tvOS 15.0, *)) {
-        _displayLink.preferredFrameRateRange = CAFrameRateRangeMake(_framerate, _framerate, _framerate);
-    } else {
-        _displayLink.preferredFramesPerSecond = _framerate;
-    }
+    _displayLink.preferredFrameRateRange = CAFrameRateRangeMake(_framerate, _framerate, _framerate);
     [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 
     [_metalView startRenderLoop];
@@ -76,9 +72,7 @@
     if (enabled) {
         layer.pixelFormat = MTLPixelFormatRGBA16Float;
         layer.wantsExtendedDynamicRangeContent = YES;
-        if (@available(iOS 16.0, tvOS 16.0, *)) {
-            layer.colorspace = CGColorSpaceCreateWithName(kCGColorSpaceExtendedLinearSRGB);
-        }
+        layer.colorspace = CGColorSpaceCreateWithName(kCGColorSpaceExtendedLinearSRGB);
     } else {
         layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
         layer.wantsExtendedDynamicRangeContent = NO;

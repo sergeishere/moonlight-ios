@@ -20,6 +20,8 @@
 #import "Limelight.h"
 #import "Connection.h"
 
-#if !TARGET_OS_VISION
+#if TARGET_OS_VISION
+#import "VisionStreamViewController.h"
+#else
 #import "StreamFrameViewController.h"
 #endif

@@ -13,13 +13,18 @@ final class BonjourBrowser: Sendable {
         let externalAddress: String?
     }
 
+    enum BonjourEvent: Sendable {
+        case found(DiscoveredEndpoint)
+        case lost(name: String)
+    }
+
     private let browser: NWBrowser
     private let stateStream: AsyncStream<NWBrowser.State>
     private let stateContinuation: AsyncStream<NWBrowser.State>.Continuation
-    private let resultsStream: AsyncStream<DiscoveredEndpoint>
-    private let resultsContinuation: AsyncStream<DiscoveredEndpoint>.Continuation
+    private let eventStream: AsyncStream<BonjourEvent>
+    private let eventContinuation: AsyncStream<BonjourEvent>.Continuation
 
-    var endpoints: AsyncStream<DiscoveredEndpoint> { resultsStream }
+    var events: AsyncStream<BonjourEvent> { eventStream }
 
     init() {
         let descriptor = NWBrowser.Descriptor.bonjour(type: "_nvstream._tcp", domain: nil)
@@ -28,7 +33,7 @@ final class BonjourBrowser: Sendable {
         self.browser = NWBrowser(for: descriptor, using: parameters)
 
         (stateStream, stateContinuation) = AsyncStream<NWBrowser.State>.makeStream()
-        (resultsStream, resultsContinuation) = AsyncStream<DiscoveredEndpoint>.makeStream()
+        (eventStream, eventContinuation) = AsyncStream<BonjourEvent>.makeStream()
 
         browser.stateUpdateHandler = { [stateContinuation] state in
             log.info("Browser state: \(String(describing: state))")
@@ -45,6 +50,12 @@ final class BonjourBrowser: Sendable {
                     self.resolveEndpoint(result)
                 case .removed(let result):
                     log.info("Service removed: \(String(describing: result.endpoint))")
+                    if case .service(let name, _, _, _) = result.endpoint {
+                        self.eventContinuation.yield(.lost(name: name))
+                    }
+                case .changed(old: _, new: let result, flags: _):
+                    log.info("Service changed: \(String(describing: result.endpoint))")
+                    self.resolveEndpoint(result)
                 default:
                     break
                 }
@@ -58,7 +69,7 @@ final class BonjourBrowser: Sendable {
 
     func stop() {
         browser.cancel()
-        resultsContinuation.finish()
+        eventContinuation.finish()
         stateContinuation.finish()
     }
 
@@ -78,7 +89,7 @@ final class BonjourBrowser: Sendable {
             case .ready:
                 if let discovered = self.buildEndpoint(from: connection, name: name) {
                     log.info("Resolved '\(name)' -> \(discovered.localAddress ?? "nil")")
-                    self.resultsContinuation.yield(discovered)
+                    self.eventContinuation.yield(.found(discovered))
                 } else {
                     log.warning("Failed to build endpoint for '\(name)'")
                 }

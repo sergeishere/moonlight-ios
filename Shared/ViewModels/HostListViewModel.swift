@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import VideoToolbox
 
 @Observable
 @MainActor
@@ -17,6 +18,8 @@ final class HostListViewModel {
 
     @ObservationIgnored
     private var pairingTask: Task<Void, Never>?
+    @ObservationIgnored
+    private var boxArtTask: Task<Void, Never>?
 
     init() {
         self.discoveryService = DiscoveryService()
@@ -131,12 +134,36 @@ final class HostListViewModel {
         }
         apps = updatedApps
         loadingApps = false
+
+        boxArtTask?.cancel()
+        boxArtTask = Task { await loadBoxArt(for: updatedApps, host: host) }
+    }
+
+    private func loadBoxArt(for apps: [App], host: Host) async {
+        let hostUUID = host.uuid
+        let client = MoonlightClient(host: host)
+
+        // Filter to only apps missing from cache
+        var toDownload: [String] = []
+        for app in apps {
+            if await BoxArtCache.shared.image(hostUUID: hostUUID, appId: app.id) == nil {
+                toDownload.append(app.id)
+            }
+        }
+
+        // Download sequentially to avoid saturating the server
+        for appId in toDownload {
+            guard !Task.isCancelled else { return }
+            guard let data = try? await client.getAppAsset(appId: appId) else { continue }
+            await BoxArtCache.shared.store(data, hostUUID: hostUUID, appId: appId)
+        }
     }
 
     // MARK: - Streaming
 
-    #if !os(visionOS)
     func launchApp(_ app: App, host: Host, settings: StreamSettings) {
+        boxArtTask?.cancel()
+
         let config = StreamConfiguration()
         config.host = host.bestAddress
         config.httpsPort = host.httpsPort
@@ -145,8 +172,8 @@ final class HostListViewModel {
         config.width = settings.width
         config.height = settings.height
         config.frameRate = settings.framerate
-        config.bitRate = settings.bitrate * 1000
-        config.audioConfiguration = settings.audioConfig
+        config.bitRate = settings.bitrate
+        config.audioConfiguration = Self.packedAudioConfig(settings.audioConfig)
         config.optimizeGameSettings = settings.optimizeGames
         config.multiController = settings.multiController
         config.swapABXYButtons = settings.swapABXYButtons
@@ -154,16 +181,21 @@ final class HostListViewModel {
         config.useFramePacing = settings.useFramePacing
         config.serverCert = host.serverCert
         config.serverCodecModeSupport = host.serverCodecModeSupport
+        config.appVersion = host.appVersion
+        config.gfeVersion = host.gfeVersion
+        config.isResume = host.currentGame != "0"
 
         var supportedVideoFormats: Int32 = 0x0001 // H.264
         let codec = settings.codec
-        if codec == .auto || codec == .hevc {
+        let hevcSupported = VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)
+        let av1Supported = VTIsHardwareDecodeSupported(kCMVideoCodecType_AV1)
+        if hevcSupported && (codec == .auto || codec == .hevc) {
             supportedVideoFormats |= 0x0100 // HEVC
             if settings.enableHdr {
                 supportedVideoFormats |= 0x0200 // HEVC HDR
             }
         }
-        if codec == .auto || codec == .av1 {
+        if av1Supported && (codec == .auto || codec == .av1) {
             supportedVideoFormats |= 0x1000 // AV1
             if settings.enableHdr {
                 supportedVideoFormats |= 0x2000 // AV1 HDR
@@ -171,12 +203,15 @@ final class HostListViewModel {
         }
         config.supportedVideoFormats = supportedVideoFormats
 
+        print("[StreamConfig] mode=\(config.width)x\(config.height)x\(config.frameRate) bitrate=\(config.bitRate) formats=0x\(String(config.supportedVideoFormats, radix: 16)) host=\(config.host ?? "nil") appID=\(config.appID ?? "nil") sops=\(config.optimizeGameSettings)")
+
+        discoveryService.stopDiscovery()
         streamConfig = config
     }
-    #endif
 
     func endStream() {
         streamConfig = nil
+        discoveryService.startDiscovery()
     }
 
     // MARK: - Pairing
@@ -224,5 +259,22 @@ final class HostListViewModel {
     func cancelWebViewPairing() {
         pairingTask?.cancel()
         pairingService.cancelPairing()
+    }
+
+    // MARK: - Audio config helpers
+
+    /// Ensures audioConfig is in packed format: (channelMask << 16) | (channelCount << 8) | 0xCA
+    /// Handles legacy values that stored raw channel count (2, 6, 8).
+    private static func packedAudioConfig(_ value: Int32) -> Int32 {
+        // Already packed (has magic byte 0xCA)
+        if value & 0xFF == 0xCA { return value }
+
+        // Legacy raw channel count → packed format
+        switch value {
+        case 2:  return (0x3 << 16)   | (2 << 8) | 0xCA  // stereo
+        case 6:  return (0x3F << 16)  | (6 << 8) | 0xCA  // 5.1
+        case 8:  return (0x63F << 16) | (8 << 8) | 0xCA  // 7.1
+        default: return (0x3 << 16)   | (2 << 8) | 0xCA  // fallback to stereo
+        }
     }
 }

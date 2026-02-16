@@ -86,29 +86,23 @@
     // but unfortunately that isn't possible today. GCMouse doesn't recognize many
     // mice correctly, but UIKit does. We will register for both and ignore UIKit
     // events if a GCMouse is connected.
-    if (@available(iOS 13.4, *)) {
-        [self addInteraction:[[UIPointerInteraction alloc] initWithDelegate:self]];
-        
-        UIPanGestureRecognizer *discreteMouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMovedDiscrete:)];
-        discreteMouseWheelRecognizer.maximumNumberOfTouches = 0;
-        discreteMouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskDiscrete;
-        discreteMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
-        [self addGestureRecognizer:discreteMouseWheelRecognizer];
-        
-        UIPanGestureRecognizer *continuousMouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMovedContinuous:)];
-        continuousMouseWheelRecognizer.maximumNumberOfTouches = 0;
-        continuousMouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskContinuous;
-        continuousMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
-        [self addGestureRecognizer:continuousMouseWheelRecognizer];
-    }
-    
-#if defined(__IPHONE_16_1) || defined(__TVOS_16_1)
-    if (@available(iOS 16.1, *)) {
-        UIHoverGestureRecognizer *stylusHoverRecognizer = [[UIHoverGestureRecognizer alloc] initWithTarget:self action:@selector(sendStylusHoverEvent:)];
-        stylusHoverRecognizer.allowedTouchTypes = @[@(UITouchTypePencil)];
-        [self addGestureRecognizer:stylusHoverRecognizer];
-    }
-#endif
+    [self addInteraction:[[UIPointerInteraction alloc] initWithDelegate:self]];
+
+    UIPanGestureRecognizer *discreteMouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMovedDiscrete:)];
+    discreteMouseWheelRecognizer.maximumNumberOfTouches = 0;
+    discreteMouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskDiscrete;
+    discreteMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
+    [self addGestureRecognizer:discreteMouseWheelRecognizer];
+
+    UIPanGestureRecognizer *continuousMouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMovedContinuous:)];
+    continuousMouseWheelRecognizer.maximumNumberOfTouches = 0;
+    continuousMouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskContinuous;
+    continuousMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
+    [self addGestureRecognizer:continuousMouseWheelRecognizer];
+
+    UIHoverGestureRecognizer *stylusHoverRecognizer = [[UIHoverGestureRecognizer alloc] initWithTarget:self action:@selector(sendStylusHoverEvent:)];
+    stylusHoverRecognizer.allowedTouchTypes = @[@(UITouchTypePencil)];
+    [self addGestureRecognizer:stylusHoverRecognizer];
 #endif
     
     // This is critical to ensure keyboard events are delivered to this
@@ -263,7 +257,7 @@
                           [self getTiltFromAltitudeAngle:event.altitudeAngle]) != LI_ERR_UNSUPPORTED;
 }
 
-- (void)sendStylusHoverEvent:(UIHoverGestureRecognizer*)gesture API_AVAILABLE(ios(13.0)) {
+- (void)sendStylusHoverEvent:(UIHoverGestureRecognizer*)gesture {
     uint8_t type;
     
     switch (gesture.state) {
@@ -283,21 +277,10 @@
     CGPoint location = [self adjustCoordinatesForVideoArea:[gesture locationInView:self]];
     CGSize videoSize = [self getVideoAreaSize];
     
-    float distance = 0.0f;
-#if defined(__IPHONE_16_1) || defined(__TVOS_16_1)
-    if (@available(iOS 16.1, *)) {
-        distance = gesture.zOffset;
-    }
-#endif
-    
-    uint16_t rotationAngle = LI_ROT_UNKNOWN;
-    uint8_t tiltAngle = LI_TILT_UNKNOWN;
-#if defined(__IPHONE_16_4) || defined(__TVOS_16_4)
-    if (@available(iOS 16.4, *)) {
-        rotationAngle = [self getRotationFromAzimuthAngle:[gesture azimuthAngleInView:self]];
-        tiltAngle = [self getTiltFromAltitudeAngle:gesture.altitudeAngle];
-    }
-#endif
+    float distance = gesture.zOffset;
+
+    uint16_t rotationAngle = [self getRotationFromAzimuthAngle:[gesture azimuthAngleInView:self]];
+    uint8_t tiltAngle = [self getTiltFromAltitudeAngle:gesture.altitudeAngle];
     
     LiSendPenEvent(type, LI_TOOL_TYPE_PEN, 0, location.x / videoSize.width, location.y / videoSize.height,
                    distance, 0.0f, 0.0f, rotationAngle, tiltAngle);
@@ -319,17 +302,15 @@
     [self startInteractionTimer];
     
 #if !TARGET_OS_TV
-    if (@available(iOS 13.4, *)) {
-        for (UITouch* touch in touches) {
-            if (touch.type == UITouchTypePencil) {
-                if ([self sendStylusEvent:touch]) {
-                    return;
-                }
+    for (UITouch* touch in touches) {
+        if (touch.type == UITouchTypePencil) {
+            if ([self sendStylusEvent:touch]) {
+                return;
             }
         }
     }
 #endif
-    
+
     if (![onScreenControls handleTouchDownEvent:touches]) {
         // We still inform the touch handler even if we're going trigger the
         // keyboard activation gesture. This is important to ensure the touch
@@ -352,17 +333,27 @@
                 // Prepare the toolbar above the keyboard for more options
                 UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
                 
-                UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
-                UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
-                UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
-                UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
-                UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
-                UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
-                UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
-                UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
-                UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-                
-                [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
+                // Dismiss button — chevron.down, large
+                UIBarButtonItem *dismissBarButton = [self createDismissButton];
+
+                // Fixed space separator (iOS 26 group separator)
+                UIBarButtonItem *separator = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
+                separator.width = 0;
+
+                // Key buttons — text labels for Windows keys, SF Symbols for the rest
+                UIBarButtonItem *windowsBarButton = [self createButtonWithTitle:@"Win" target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
+                UIBarButtonItem *escapeBarButton = [self createButtonWithSystemImage:@"escape" target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
+                UIBarButtonItem *tabBarButton = [self createButtonWithSystemImage:@"arrow.right.to.line" target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
+                UIBarButtonItem *shiftBarButton = [self createButtonWithSystemImage:@"shift" target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
+                UIBarButtonItem *controlBarButton = [self createButtonWithTitle:@"Ctrl" target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
+                UIBarButtonItem *altBarButton = [self createButtonWithTitle:@"Alt" target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
+                UIBarButtonItem *deleteBarButton = [self createButtonWithSystemImage:@"delete.backward" target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
+
+                // Center toolbar items with flexible spaces on both sides
+                UIBarButtonItem *flexLeft = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+                UIBarButtonItem *flexRight = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+
+                [customToolbarView setItems:@[flexLeft, dismissBarButton, separator, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexRight]];
                 keyInputField.inputAccessoryView = customToolbarView;
 #endif
                 [keyInputField becomeFirstResponder];
@@ -377,21 +368,49 @@
     }
 }
 
-- (UIBarButtonItem *)createButtonWithImageNamed:(NSString *)imageName backgroundColor:(UIColor *)backgroundColor target:(id)target action:(SEL)action keyCode:(NSInteger)keyCode isToggleable:(BOOL)isToggleable {
-    UIImage *image = [UIImage imageNamed:imageName];
+- (UIBarButtonItem *)createDismissButton {
+    UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:28 weight:UIImageSymbolWeightMedium scale:UIImageSymbolScaleLarge];
+    UIImage *image = [UIImage systemImageNamed:@"chevron.down" withConfiguration:config];
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     [button setImage:image forState:UIControlStateNormal];
-    button.frame = CGRectMake(0, 0, 30, 30);
-    button.imageView.contentMode = UIViewContentModeScaleAspectFit;
-    button.imageView.backgroundColor = backgroundColor;
-    button.imageView.layer.cornerRadius = 10.0;
-    button.imageEdgeInsets = UIEdgeInsetsMake(6, 6, 6, 6);
+    button.frame = CGRectMake(0, 0, 48, 36);
+    button.tintColor = [UIColor whiteColor];
+    [button addTarget:self action:@selector(toolbarButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+    objc_setAssociatedObject(button, "keyCode", @(0x00), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(button, "isToggleable", @(NO), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(button, "isOn", @(NO), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    return [[UIBarButtonItem alloc] initWithCustomView:button];
+}
+
+- (UIBarButtonItem *)createButtonWithSystemImage:(NSString *)symbolName target:(id)target action:(SEL)action keyCode:(NSInteger)keyCode isToggleable:(BOOL)isToggleable {
+    UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:22 weight:UIImageSymbolWeightMedium];
+    UIImage *image = [UIImage systemImageNamed:symbolName withConfiguration:config];
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    [button setImage:image forState:UIControlStateNormal];
+    button.frame = CGRectMake(0, 0, 44, 30);
+    button.tintColor = [UIColor whiteColor];
+    button.backgroundColor = [UIColor blackColor];
+    button.layer.cornerRadius = 8.0;
     [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
     objc_setAssociatedObject(button, "keyCode", @(keyCode), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     objc_setAssociatedObject(button, "isToggleable", @(isToggleable), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     objc_setAssociatedObject(button, "isOn", @(NO), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    UIBarButtonItem *barButton = [[UIBarButtonItem alloc] initWithCustomView:button];
-    return barButton;
+    return [[UIBarButtonItem alloc] initWithCustomView:button];
+}
+
+- (UIBarButtonItem *)createButtonWithTitle:(NSString *)title target:(id)target action:(SEL)action keyCode:(NSInteger)keyCode isToggleable:(BOOL)isToggleable {
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    [button setTitle:title forState:UIControlStateNormal];
+    button.titleLabel.font = [UIFont systemFontOfSize:15 weight:UIFontWeightMedium];
+    button.frame = CGRectMake(0, 0, 44, 30);
+    [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    button.backgroundColor = [UIColor blackColor];
+    button.layer.cornerRadius = 8.0;
+    [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
+    objc_setAssociatedObject(button, "keyCode", @(keyCode), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(button, "isToggleable", @(isToggleable), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(button, "isOn", @(NO), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    return [[UIBarButtonItem alloc] initWithCustomView:button];
 }
 
 - (void)toolbarButtonClicked:(UIButton *)sender {
@@ -401,9 +420,13 @@
         isOn = !isOn;
         // Update the button's appearance based on its new state
         if (isOn) {
-            sender.imageView.backgroundColor = [UIColor lightGrayColor];
+            sender.tintColor = [UIColor systemBlueColor];
+            [sender setTitleColor:[UIColor systemBlueColor] forState:UIControlStateNormal];
+            sender.backgroundColor = [UIColor darkGrayColor];
         } else {
-            sender.imageView.backgroundColor = [UIColor blackColor];
+            sender.tintColor = [UIColor whiteColor];
+            [sender setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+            sender.backgroundColor = [UIColor blackColor];
         }
     }
     // Update the new on/off state of the button
@@ -436,94 +459,79 @@
 
 - (BOOL)handleMouseButtonEvent:(int)buttonAction forTouches:(NSSet *)touches withEvent:(UIEvent *)event {
 #if !TARGET_OS_TV
-    if (@available(iOS 13.4, *)) {
-        UITouch* touch = [touches anyObject];
-        if (touch.type == UITouchTypeIndirectPointer) {
-            if (@available(iOS 14.0, *)) {
-                if ([GCMouse current] != nil) {
-                    // We'll handle this with GCMouse. Do nothing here.
-                    return YES;
-                }
-            }
-            
-            UIEventButtonMask normalizedButtonMask;
-            
-            // iOS 14 includes the released button in the buttonMask for the release
-            // event, while iOS 13 does not. Normalize that behavior here.
-            if (@available(iOS 14.0, *)) {
-                if (buttonAction == BUTTON_ACTION_RELEASE) {
-                    normalizedButtonMask = lastMouseButtonMask & ~event.buttonMask;
-                }
-                else {
-                    normalizedButtonMask = event.buttonMask;
-                }
-            }
-            else {
-                normalizedButtonMask = event.buttonMask;
-            }
-            
-            UIEventButtonMask changedButtons = lastMouseButtonMask ^ normalizedButtonMask;
-                        
-            for (int i = BUTTON_LEFT; i <= BUTTON_X2; i++) {
-                UIEventButtonMask buttonFlag;
-                
-                switch (i) {
-                    // Right and Middle are reversed from what iOS uses
-                    case BUTTON_RIGHT:
-                        buttonFlag = UIEventButtonMaskForButtonNumber(2);
-                        break;
-                    case BUTTON_MIDDLE:
-                        buttonFlag = UIEventButtonMaskForButtonNumber(3);
-                        break;
-                        
-                    default:
-                        buttonFlag = UIEventButtonMaskForButtonNumber(i);
-                        break;
-                }
-                
-                if (changedButtons & buttonFlag) {
-                    LiSendMouseButtonEvent(buttonAction, i);
-                }
-            }
-            
-            lastMouseButtonMask = normalizedButtonMask;
+    UITouch* touch = [touches anyObject];
+    if (touch.type == UITouchTypeIndirectPointer) {
+        if ([GCMouse current] != nil) {
+            // We'll handle this with GCMouse. Do nothing here.
             return YES;
         }
+
+        UIEventButtonMask normalizedButtonMask;
+
+        if (buttonAction == BUTTON_ACTION_RELEASE) {
+            normalizedButtonMask = lastMouseButtonMask & ~event.buttonMask;
+        }
+        else {
+            normalizedButtonMask = event.buttonMask;
+        }
+
+        UIEventButtonMask changedButtons = lastMouseButtonMask ^ normalizedButtonMask;
+
+        for (int i = BUTTON_LEFT; i <= BUTTON_X2; i++) {
+            UIEventButtonMask buttonFlag;
+
+            switch (i) {
+                // Right and Middle are reversed from what iOS uses
+                case BUTTON_RIGHT:
+                    buttonFlag = UIEventButtonMaskForButtonNumber(2);
+                    break;
+                case BUTTON_MIDDLE:
+                    buttonFlag = UIEventButtonMaskForButtonNumber(3);
+                    break;
+
+                default:
+                    buttonFlag = UIEventButtonMaskForButtonNumber(i);
+                    break;
+            }
+
+            if (changedButtons & buttonFlag) {
+                LiSendMouseButtonEvent(buttonAction, i);
+            }
+        }
+
+        lastMouseButtonMask = normalizedButtonMask;
+        return YES;
     }
 #endif
-    
+
     return NO;
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 #if !TARGET_OS_TV
-    if (@available(iOS 13.4, *)) {
-        for (UITouch* touch in touches) {
-            if (touch.type == UITouchTypePencil) {
-                if ([self sendStylusEvent:touch]) {
-                    return;
-                }
+    for (UITouch* touch in touches) {
+        if (touch.type == UITouchTypePencil) {
+            if ([self sendStylusEvent:touch]) {
+                return;
             }
         }
-        
-        UITouch *touch = [touches anyObject];
-        if (touch.type == UITouchTypeIndirectPointer) {
-            if (@available(iOS 14.0, *)) {
-                if ([GCMouse current] != nil) {
-                    // We'll handle this with GCMouse. Do nothing here.
-                    return;
-                }
-            }
-            
-            // We must handle this event to properly support
-            // drags while the middle, X1, or X2 mouse buttons are
-            // held down. For some reason, left and right buttons
-            // don't require this, but we do it anyway for them too.
-            // Cursor movement without a button held down is handled
-            // in pointerInteraction:regionForRequest:defaultRegion.
-            [self updateCursorLocation:[touch locationInView:self] isMouse:YES];
+    }
+
+    UITouch *touch = [touches anyObject];
+    if (touch.type == UITouchTypeIndirectPointer) {
+        if ([GCMouse current] != nil) {
+            // We'll handle this with GCMouse. Do nothing here.
             return;
         }
+
+        // We must handle this event to properly support
+        // drags while the middle, X1, or X2 mouse buttons are
+        // held down. For some reason, left and right buttons
+        // don't require this, but we do it anyway for them too.
+        // Cursor movement without a button held down is handled
+        // in pointerInteraction:regionForRequest:defaultRegion.
+        [self updateCursorLocation:[touch locationInView:self] isMouse:YES];
+        return;
     }
 #endif
     
@@ -536,18 +544,16 @@
 
 - (void)pressesBegan:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event {
     BOOL handled = NO;
-    
-    if (@available(iOS 13.4, tvOS 13.4, *)) {
-        for (UIPress* press in presses) {
-            // For now, we'll treated it as handled if we handle at least one of the
-            // UIPress events inside the set.
-            if ([KeyboardSupport sendKeyEventForPress:press down:YES]) {
-                // This will prevent the legacy UITextField from receiving the event
-                handled = YES;
-            }
+
+    for (UIPress* press in presses) {
+        // For now, we'll treated it as handled if we handle at least one of the
+        // UIPress events inside the set.
+        if ([KeyboardSupport sendKeyEventForPress:press down:YES]) {
+            // This will prevent the legacy UITextField from receiving the event
+            handled = YES;
         }
     }
-    
+
     if (!handled) {
         [super pressesBegan:presses withEvent:event];
     }
@@ -555,18 +561,16 @@
 
 - (void)pressesEnded:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event {
     BOOL handled = NO;
-    
-    if (@available(iOS 13.4, tvOS 13.4, *)) {
-        for (UIPress* press in presses) {
-            // For now, we'll treated it as handled if we handle at least one of the
-            // UIPress events inside the set.
-            if ([KeyboardSupport sendKeyEventForPress:press down:NO]) {
-                // This will prevent the legacy UITextField from receiving the event
-                handled = YES;
-            }
+
+    for (UIPress* press in presses) {
+        // For now, we'll treated it as handled if we handle at least one of the
+        // UIPress events inside the set.
+        if ([KeyboardSupport sendKeyEventForPress:press down:NO]) {
+            // This will prevent the legacy UITextField from receiving the event
+            handled = YES;
         }
     }
-    
+
     if (!handled) {
         [super pressesEnded:presses withEvent:event];
     }
@@ -585,17 +589,15 @@
     hasUserInteracted = YES;
     
 #if !TARGET_OS_TV
-    if (@available(iOS 13.4, *)) {
-        for (UITouch* touch in touches) {
-            if (touch.type == UITouchTypePencil) {
-                if ([self sendStylusEvent:touch]) {
-                    return;
-                }
+    for (UITouch* touch in touches) {
+        if (touch.type == UITouchTypePencil) {
+            if ([self sendStylusEvent:touch]) {
+                return;
             }
         }
     }
 #endif
-    
+
     if (![onScreenControls handleTouchUpEvent:touches]) {
         [touchHandler touchesEnded:touches withEvent:event];
     }
@@ -607,11 +609,9 @@
                       forTouches:touches
                        withEvent:event];
 #if !TARGET_OS_TV
-    if (@available(iOS 13.4, *)) {
-        for (UITouch* touch in touches) {
-            if (touch.type == UITouchTypePencil) {
-                [self sendStylusEvent:touch];
-            }
+    for (UITouch* touch in touches) {
+        if (touch.type == UITouchTypePencil) {
+            [self sendStylusEvent:touch];
         }
     }
 #endif
@@ -643,14 +643,12 @@
 
 - (UIPointerRegion *)pointerInteraction:(UIPointerInteraction *)interaction
                        regionForRequest:(UIPointerRegionRequest *)request
-                          defaultRegion:(UIPointerRegion *)defaultRegion API_AVAILABLE(ios(13.4)) {
-    if (@available(iOS 14.0, *)) {
-        if ([GCMouse current] != nil) {
-            // We'll handle this with GCMouse. Do nothing here.
-            return nil;
-        }
+                          defaultRegion:(UIPointerRegion *)defaultRegion {
+    if ([GCMouse current] != nil) {
+        // We'll handle this with GCMouse. Do nothing here.
+        return nil;
     }
-    
+
     // This logic mimics what iOS does with AVLayerVideoGravityResizeAspect
     CGSize videoSize;
     CGPoint videoOrigin;
@@ -672,7 +670,7 @@
     return [UIPointerRegion regionWithRect:CGRectMake(videoOrigin.x, videoOrigin.y, videoSize.width, videoSize.height) identifier:nil];
 }
 
-- (UIPointerStyle *)pointerInteraction:(UIPointerInteraction *)interaction styleForRegion:(UIPointerRegion *)region  API_AVAILABLE(ios(13.4)) {
+- (UIPointerStyle *)pointerInteraction:(UIPointerInteraction *)interaction styleForRegion:(UIPointerRegion *)region {
     // Always hide the mouse cursor over our stream view
     return [UIPointerStyle hiddenPointerStyle];
 }
@@ -749,13 +747,8 @@
 #endif
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
-    if (@available(iOS 13.0, *)) {
-        // Disable the 3 finger tap gestures that trigger the copy/paste/undo toolbar on iOS 13+
-        return gestureRecognizer.name == nil || ![gestureRecognizer.name hasPrefix:@"kbProductivity."];
-    }
-    else {
-        return YES;
-    }
+    // Disable the 3 finger tap gestures that trigger the copy/paste/undo toolbar
+    return gestureRecognizer.name == nil || ![gestureRecognizer.name hasPrefix:@"kbProductivity."];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {

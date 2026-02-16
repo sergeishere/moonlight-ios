@@ -28,6 +28,8 @@ final class Host {
     @Transient var isNvidiaServerSoftware: Bool = false
     @Transient var astrumVersion: Int = 0
     @Transient var updatePending: Bool = false
+    @Transient var appVersion: String?
+    @Transient var gfeVersion: String?
 
     // MARK: - Init
 
@@ -107,6 +109,8 @@ final class Host {
 
         isNvidiaServerSoftware = info.isNvidiaServerSoftware
         astrumVersion = info.astrumVersion ?? 0
+        appVersion = info.appVersion
+        gfeVersion = info.gfeVersion
 
         // Pair status: don't downgrade to unpaired if we have a server cert
         // (local proof of successful pairing — server may not report paired over HTTP)

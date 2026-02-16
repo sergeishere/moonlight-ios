@@ -26,6 +26,8 @@ struct HostCardView: View {
         .padding(20)
         .frame(width: 195, height: 260)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20))
+        .contentShape(.hoverEffect, RoundedRectangle(cornerRadius: 20))
+        .hoverEffect()
         .overlay(alignment: .topTrailing) {
             if host.isPaired {
                 Image(systemName: "personalhotspot")

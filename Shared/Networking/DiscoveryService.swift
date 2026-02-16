@@ -39,10 +39,16 @@ final class DiscoveryService {
         browser.start()
 
         browseTask = Task { [weak self] in
-            for await endpoint in browser.endpoints {
+            for await event in browser.events {
                 guard let self, !Task.isCancelled else { break }
-                log.info("Bonjour: found '\(endpoint.name)' at \(endpoint.localAddress ?? "nil")")
-                await self.handleDiscoveredEndpoint(endpoint)
+                switch event {
+                case .found(let endpoint):
+                    log.info("Bonjour: found '\(endpoint.name)' at \(endpoint.localAddress ?? "nil")")
+                    await self.handleDiscoveredEndpoint(endpoint)
+                case .lost(let name):
+                    log.info("Bonjour: host '\(name)' lost")
+                    self.handleLostEndpoint(name: name)
+                }
             }
         }
 
@@ -167,14 +173,15 @@ final class DiscoveryService {
             }
 
             saveContext()
-
-            // Host is reachable — start state maintenance poller
-            if isDiscovering && !pausedHostUUIDs.contains(host.uuid) {
-                startPoller(for: host)
-            }
         } catch {
             log.warning("Bonjour endpoint '\(endpoint.name)' unreachable: \(error.localizedDescription)")
         }
+    }
+
+    private func handleLostEndpoint(name: String) {
+        guard let host = discoveredHosts.first(where: { $0.name == name }) else { return }
+        stopPoller(for: host)
+        host.state = Int(HostState.offline.rawValue)
     }
 
     // MARK: - Polling

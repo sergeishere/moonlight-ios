@@ -24,6 +24,7 @@
 @interface StreamFrameViewController : UIViewController <ConnectionCallbacks, ControllerSupportDelegate, UserInteractionDelegate, UIScrollViewDelegate>
 #endif
 @property (nonatomic) StreamConfiguration* streamConfig;
+@property (nonatomic, copy) void (^onDismiss)(void);
 
 -(void)updatePreferredDisplayMode:(BOOL)streamActive;
 

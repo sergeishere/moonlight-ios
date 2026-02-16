@@ -56,8 +56,6 @@ void DrStop(void)
     [renderer stop];
 }
 
-// Forward declaration for pull-renderer path (visionOS)
-int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 
 -(BOOL) getVideoStats:(video_stats_t*)stats
 {
@@ -339,12 +337,14 @@ void ClSetControllerLED(uint16_t controllerNumber, uint8_t r, uint8_t g, uint8_t
     _drCallbacks.setup = DrDecoderSetup;
     _drCallbacks.start = DrStart;
     _drCallbacks.stop = DrStop;
+    _drCallbacks.submitDecodeUnit = DrSubmitDecodeUnit;
 #if TARGET_OS_VISION
-    _drCallbacks.capabilities = CAPABILITY_PULL_RENDERER |
+    // visionOS: AVSampleBufferVideoRenderer.enqueueSampleBuffer is non-blocking,
+    // so we can submit directly from the receive thread without a decoder thread.
+    _drCallbacks.capabilities = CAPABILITY_DIRECT_SUBMIT |
                                 CAPABILITY_REFERENCE_FRAME_INVALIDATION_HEVC |
                                 CAPABILITY_REFERENCE_FRAME_INVALIDATION_AV1;
 #else
-    // iOS/tvOS: VTDecompressionSession is push-based (frames delivered via callback)
     _drCallbacks.capabilities = CAPABILITY_REFERENCE_FRAME_INVALIDATION_HEVC |
                                 CAPABILITY_REFERENCE_FRAME_INVALIDATION_AV1;
 #endif

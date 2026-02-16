@@ -53,7 +53,6 @@ struct HostListView: View {
         .sheet(isPresented: $showingSettings) {
             SettingsView()
         }
-        #if !os(visionOS)
         .fullScreenCover(isPresented: Binding(
             get: { viewModel.streamConfig != nil },
             set: { if !$0 { viewModel.endStream() } }
@@ -65,7 +64,6 @@ struct HostListView: View {
                     .persistentSystemOverlays(.hidden)
             }
         }
-        #endif
     }
 
     // MARK: - Host Picker
@@ -205,7 +203,7 @@ struct HostListView: View {
                             Button {
                                 launchStream(app: app)
                             } label: {
-                                AppCardView(app: app)
+                                AppCardView(app: app, hostUUID: host.uuid)
                             }
                             .buttonStyle(.plain)
                         }
@@ -255,11 +253,9 @@ struct HostListView: View {
     // MARK: - Streaming
 
     private func launchStream(app: App) {
-        #if !os(visionOS)
         guard let host = viewModel.selectedHost else { return }
         let settings = allSettings.first ?? StreamSettings()
         viewModel.launchApp(app, host: host, settings: settings)
-        #endif
     }
 
     @Query private var allSettings: [StreamSettings]

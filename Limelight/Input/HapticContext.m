@@ -13,12 +13,12 @@
 
 @implementation HapticContext {
     GCControllerPlayerIndex _playerIndex;
-    CHHapticEngine* _hapticEngine API_AVAILABLE(ios(13.0), tvos(14.0));
-    id<CHHapticPatternPlayer> _hapticPlayer API_AVAILABLE(ios(13.0), tvos(14.0));
+    CHHapticEngine* _hapticEngine;
+    id<CHHapticPatternPlayer> _hapticPlayer;
     BOOL _playing;
 }
 
--(void)cleanup API_AVAILABLE(ios(14.0), tvos(14.0)) {
+-(void)cleanup {
     if (_hapticPlayer != nil) {
         [_hapticPlayer cancelAndReturnError:nil];
         _hapticPlayer = nil;
@@ -29,7 +29,7 @@
     }
 }
 
--(void)setMotorAmplitude:(unsigned short)amplitude API_AVAILABLE(ios(14.0), tvos(14.0)) {
+-(void)setMotorAmplitude:(unsigned short)amplitude {
     NSError* error;
 
     // Check if the haptic engine died
@@ -83,7 +83,7 @@
     }
 }
 
--(id) initWithGamepad:(GCController*)gamepad locality:(GCHapticsLocality)locality API_AVAILABLE(ios(14.0), tvos(14.0)) {
+-(id) initWithGamepad:(GCController*)gamepad locality:(GCHapticsLocality)locality {
     if (gamepad.haptics == nil) {
         Log(LOG_W, @"Controller %d does not support haptics", gamepad.playerIndex);
         return nil;
@@ -132,39 +132,19 @@
 }
 
 +(HapticContext*) createContextForHighFreqMotor:(GCController*)gamepad {
-    if (@available(iOS 14.0, tvOS 14.0, *)) {
-        return [[HapticContext alloc] initWithGamepad:gamepad locality:GCHapticsLocalityRightHandle];
-    }
-    else {
-        return nil;
-    }
+    return [[HapticContext alloc] initWithGamepad:gamepad locality:GCHapticsLocalityRightHandle];
 }
 
 +(HapticContext*) createContextForLowFreqMotor:(GCController*)gamepad {
-    if (@available(iOS 14.0, tvOS 14.0, *)) {
-        return [[HapticContext alloc] initWithGamepad:gamepad locality:GCHapticsLocalityLeftHandle];
-    }
-    else {
-        return nil;
-    }
+    return [[HapticContext alloc] initWithGamepad:gamepad locality:GCHapticsLocalityLeftHandle];
 }
 
 +(HapticContext*) createContextForLeftTrigger:(GCController*)gamepad {
-    if (@available(iOS 14.0, tvOS 14.0, *)) {
-        return [[HapticContext alloc] initWithGamepad:gamepad locality:GCHapticsLocalityLeftTrigger];
-    }
-    else {
-        return nil;
-    }
+    return [[HapticContext alloc] initWithGamepad:gamepad locality:GCHapticsLocalityLeftTrigger];
 }
 
 +(HapticContext*) createContextForRightTrigger:(GCController*)gamepad {
-    if (@available(iOS 14.0, tvOS 14.0, *)) {
-        return [[HapticContext alloc] initWithGamepad:gamepad locality:GCHapticsLocalityRightTrigger];
-    }
-    else {
-        return nil;
-    }
+    return [[HapticContext alloc] initWithGamepad:gamepad locality:GCHapticsLocalityRightTrigger];
 }
 
 @end

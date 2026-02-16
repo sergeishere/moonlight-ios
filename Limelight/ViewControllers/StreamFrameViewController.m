@@ -60,6 +60,9 @@
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
+#if !TARGET_OS_TV
+    [self setNeedsUpdateOfPrefersPointerLocked];
+#endif
 }
 
 #if TARGET_OS_TV
@@ -280,7 +283,9 @@
     [_statsUpdateTimer invalidate];
     _statsUpdateTimer = nil;
 
-    [self.navigationController popToRootViewControllerAnimated:YES];
+    if (self.onDismiss) {
+        self.onDismiss();
+    }
 }
 
 - (void)applicationWillResignActive:(NSNotification *)notification {
@@ -535,27 +540,25 @@
 
 - (void) updatePreferredDisplayMode:(BOOL)streamActive {
 #if TARGET_OS_TV
-    if (@available(tvOS 11.2, *)) {
-        UIWindow* window = [[[UIApplication sharedApplication] delegate] window];
-        AVDisplayManager* displayManager = [window avDisplayManager];
+    UIWindow* window = [[[UIApplication sharedApplication] delegate] window];
+    AVDisplayManager* displayManager = [window avDisplayManager];
 
-        if (streamActive) {
-            int dynamicRange;
+    if (streamActive) {
+        int dynamicRange;
 
-            if (LiGetCurrentHostDisplayHdrMode()) {
-                dynamicRange = 2; // HDR10
-            }
-            else {
-                dynamicRange = 0; // SDR
-            }
-
-            AVDisplayCriteria* displayCriteria = [[AVDisplayCriteria alloc] initWithRefreshRate:[_settings.framerate floatValue]
-                                                                              videoDynamicRange:dynamicRange];
-            displayManager.preferredDisplayCriteria = displayCriteria;
+        if (LiGetCurrentHostDisplayHdrMode()) {
+            dynamicRange = 2; // HDR10
         }
         else {
-            displayManager.preferredDisplayCriteria = nil;
+            dynamicRange = 0; // SDR
         }
+
+        AVDisplayCriteria* displayCriteria = [[AVDisplayCriteria alloc] initWithRefreshRate:[_settings.framerate floatValue]
+                                                                          videoDynamicRange:dynamicRange];
+        displayManager.preferredDisplayCriteria = displayCriteria;
+    }
+    else {
+        displayManager.preferredDisplayCriteria = nil;
     }
 #endif
 }
@@ -582,17 +585,13 @@
 
 - (void)gamepadPresenceChanged {
 #if !TARGET_OS_TV
-    if (@available(iOS 11.0, *)) {
-        [self setNeedsUpdateOfHomeIndicatorAutoHidden];
-    }
+    [self setNeedsUpdateOfHomeIndicatorAutoHidden];
 #endif
 }
 
 - (void)mousePresenceChanged {
 #if !TARGET_OS_TV
-    if (@available(iOS 14.0, *)) {
-        [self setNeedsUpdateOfPrefersPointerLocked];
-    }
+    [self setNeedsUpdateOfPrefersPointerLocked];
 #endif
 }
 
@@ -604,18 +603,14 @@
 - (void)userInteractionBegan {
     _userIsInteracting = YES;
 #if !TARGET_OS_TV
-    if (@available(iOS 11.0, *)) {
-        [self setNeedsUpdateOfHomeIndicatorAutoHidden];
-    }
+    [self setNeedsUpdateOfHomeIndicatorAutoHidden];
 #endif
 }
 
 - (void)userInteractionEnded {
     _userIsInteracting = NO;
 #if !TARGET_OS_TV
-    if (@available(iOS 11.0, *)) {
-        [self setNeedsUpdateOfHomeIndicatorAutoHidden];
-    }
+    [self setNeedsUpdateOfHomeIndicatorAutoHidden];
 #endif
 }
 
@@ -639,7 +634,7 @@
 }
 
 - (BOOL)prefersPointerLocked {
-    return [GCMouse mice].count > 0;
+    return YES;
 }
 #endif
 

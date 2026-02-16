@@ -81,6 +81,9 @@ let moonlightApp = Target.target(
         // StreamFrameViewController (UIViewControllerRepresentable wrapper)
         "Limelight/ViewControllers/StreamFrameViewController.h",
         "Limelight/ViewControllers/StreamFrameViewController.m",
+        // VisionStreamViewController (visionOS streaming)
+        "Limelight/ViewControllers/VisionStreamViewController.h",
+        "Limelight/ViewControllers/VisionStreamViewController.m",
         // Network (needed by StreamManager)
         "Limelight/Network/HttpManager.h",
         "Limelight/Network/HttpManager.m",
@@ -170,6 +173,11 @@ let moonlightApp = Target.target(
 let project = Project(
     name: "Moonlight",
     settings: .settings(
+        base: [
+            "IPHONEOS_DEPLOYMENT_TARGET": "26.0",
+            "TVOS_DEPLOYMENT_TARGET": "26.0",
+            "XROS_DEPLOYMENT_TARGET": "26.0",
+        ],
         configurations: [
             .debug(name: "Debug", xcconfig: "Configurations/credentials.xcconfig"),
             .release(name: "Release", xcconfig: "Configurations/credentials.xcconfig"),

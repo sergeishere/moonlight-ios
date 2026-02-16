@@ -109,7 +109,7 @@ int AudioRenderer_Init(int audioConfiguration,
     AudioComponentDescription desc = {
         .componentType = kAudioUnitType_Output,
 #if TARGET_OS_VISION
-        .componentSubType = kAudioUnitSubType_DefaultOutput,
+        .componentSubType = kAudioUnitSubType_GenericOutput,
 #else
         .componentSubType = kAudioUnitSubType_RemoteIO,
 #endif

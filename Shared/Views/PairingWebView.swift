@@ -81,9 +81,7 @@ private struct ProxiedWebView: UIViewRepresentable {
         webView.underPageBackgroundColor = .black
 
         #if DEBUG
-        if #available(iOS 16.4, *) {
-            webView.isInspectable = true
-        }
+        webView.isInspectable = true
         #endif
 
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)!

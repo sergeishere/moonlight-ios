@@ -262,10 +262,7 @@ struct SettingsView: View {
     }
 
     private var av1Supported: Bool {
-        if #available(iOS 16.0, tvOS 16.0, visionOS 1.0, *) {
-            return VTIsHardwareDecodeSupported(kCMVideoCodecType_AV1)
-        }
-        return false
+        VTIsHardwareDecodeSupported(kCMVideoCodecType_AV1)
     }
 
     private var hdrCapable: Bool {

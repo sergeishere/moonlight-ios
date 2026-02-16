@@ -159,11 +159,36 @@ typedef struct {
 
     MTLRenderPassDescriptor *renderPass = [MTLRenderPassDescriptor renderPassDescriptor];
     renderPass.colorAttachments[0].texture = _currentDrawable.texture;
-    renderPass.colorAttachments[0].loadAction = MTLLoadActionDontCare;
+    renderPass.colorAttachments[0].loadAction = MTLLoadActionClear;
+    renderPass.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1);
     renderPass.colorAttachments[0].storeAction = MTLStoreActionStore;
 
     id<MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:renderPass];
+
+    // Calculate aspect-ratio-preserving viewport
+    CGFloat drawableW = _currentDrawable.texture.width;
+    CGFloat drawableH = _currentDrawable.texture.height;
+    CGFloat videoAspect = (CGFloat)width / (CGFloat)height;
+    CGFloat drawableAspect = drawableW / drawableH;
+
+    CGFloat vpX, vpY, vpW, vpH;
+    if (videoAspect > drawableAspect) {
+        // Video is wider — letterbox top/bottom
+        vpW = drawableW;
+        vpH = drawableW / videoAspect;
+        vpX = 0;
+        vpY = (drawableH - vpH) / 2.0;
+    } else {
+        // Video is taller — pillarbox left/right
+        vpH = drawableH;
+        vpW = drawableH * videoAspect;
+        vpX = (drawableW - vpW) / 2.0;
+        vpY = 0;
+    }
+
+    MTLViewport viewport = { vpX, vpY, vpW, vpH, 0.0, 1.0 };
+    [encoder setViewport:viewport];
 
     [encoder setRenderPipelineState:pipeline];
     [encoder setFragmentTexture:lumaTexture atIndex:0];

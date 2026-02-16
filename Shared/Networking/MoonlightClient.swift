@@ -6,6 +6,7 @@ final class MoonlightClient: Sendable {
     private let baseHTTPSURL: String?
     private let uniqueId: String
     private let deviceName: String
+    private let isPaired: Bool
     private let session: URLSession
     private let sslDelegate: SSLPinningDelegate
 
@@ -25,6 +26,7 @@ final class MoonlightClient: Sendable {
         }
         self.uniqueId = Self.getUniqueId()
         self.deviceName = "roth"
+        self.isPaired = serverCert != nil
         self.sslDelegate = SSLPinningDelegate(serverCert: serverCert)
         self.session = URLSession(
             configuration: .ephemeral,
@@ -52,22 +54,16 @@ final class MoonlightClient: Sendable {
     func getServerInfo(timeout: TimeInterval? = nil) async throws -> ServerInfo {
         let timeout = timeout ?? Self.normalTimeout
 
-        // Try HTTPS first if available, then fall back to HTTP
-        if let httpsURL = baseHTTPSURL {
-            let url = "\(httpsURL)/serverinfo?uniqueid=\(uniqueId)"
-            do {
-                return try await fetchAndDecode(url: url, timeout: timeout)
-            } catch {
-                // Fall back to HTTP on certificate trust failure
-                if (error as NSError).code == NSURLErrorServerCertificateUntrusted {
-                    let httpURL = "\(baseHTTPURL)/serverinfo?uniqueid=\(uniqueId)"
-                    return try await fetchAndDecode(url: httpURL, timeout: timeout)
-                }
-                throw error
+        if isPaired {
+            // Paired: HTTPS only — validates client certificate
+            guard let httpsURL = baseHTTPSURL else {
+                throw MoonlightClientError.httpsNotAvailable
             }
+            let url = "\(httpsURL)/serverinfo?uniqueid=\(uniqueId)"
+            return try await fetchAndDecode(url: url, timeout: timeout)
         }
 
-        // HTTP-only (pre-pairing)
+        // Unpaired: HTTP only
         let url = "\(baseHTTPURL)/serverinfo?uniqueid=\(uniqueId)"
         return try await fetchAndDecode(url: url, timeout: timeout)
     }
@@ -178,6 +174,14 @@ final class MoonlightClient: Sendable {
         guard httpResponse?.statusCode == 200 else {
             throw MoonlightClientError.httpError(httpResponse?.statusCode ?? 0)
         }
+
+        // Server returns HTTP 200 even for errors, with XML body containing status_code.
+        // Detect small responses that look like XML error documents.
+        if data.count < 1024, let text = String(data: data, encoding: .utf8), text.contains("status_code") {
+            let xmlResponse = try ServerResponse<EmptyContent>(from: fixXmlEncoding(data))
+            throw ServerResponseError.serverError(xmlResponse.statusCode, xmlResponse.statusMessage)
+        }
+
         return data
     }
 

@@ -174,7 +174,12 @@ final class DiscoveryService {
 
             saveContext()
         } catch {
-            log.warning("Bonjour endpoint '\(endpoint.name)' unreachable: \(error.localizedDescription)")
+            if let host = existingHost, isAuthFailure(error) {
+                log.error("Bonjour endpoint '\(endpoint.name)' cert rejected — marking unpaired")
+                markHostUnpaired(host)
+            } else {
+                log.warning("Bonjour endpoint '\(endpoint.name)' unreachable: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -191,6 +196,7 @@ final class DiscoveryService {
     private func pollWANOnce(for host: Host) {
         guard let wanAddress = host.externalAddress ?? host.address else { return }
         let serverCert = host.serverCert
+        let httpsPort = host.httpsPort
         let hostUUID = host.uuid
         let hostName = host.name
 
@@ -201,7 +207,7 @@ final class DiscoveryService {
             let client = MoonlightClient(
                 address: addr,
                 port: port,
-                httpsPort: 0,
+                httpsPort: httpsPort,
                 serverCert: serverCert
             )
 
@@ -217,7 +223,14 @@ final class DiscoveryService {
                     self.startPoller(for: host)
                 }
             } catch {
-                log.info("WAN poll for '\(hostName)' failed: \(error.localizedDescription)")
+                if self.isAuthFailure(error) {
+                    log.error("WAN poll for '\(hostName)' — cert rejected, marking unpaired")
+                    if let host = self.discoveredHosts.first(where: { $0.uuid == hostUUID }) {
+                        self.markHostUnpaired(host)
+                    }
+                } else {
+                    log.info("WAN poll for '\(hostName)' failed: \(error.localizedDescription)")
+                }
             }
         }
     }
@@ -278,6 +291,14 @@ final class DiscoveryService {
                     }
                     self.saveContext()
                 },
+                onAuthFailure: { [weak self] in
+                    guard let self else { return }
+                    log.error("Poller for '\(hostName)' — cert rejected, marking unpaired")
+                    self.pollers.removeValue(forKey: hostUUID)
+                    if let host = self.discoveredHosts.first(where: { $0.uuid == hostUUID }) {
+                        self.markHostUnpaired(host)
+                    }
+                },
                 onStoppedByFailures: { [weak self] in
                     guard let self else { return }
                     log.info("Poller for '\(hostName)' stopped — host went offline")
@@ -308,6 +329,22 @@ final class DiscoveryService {
         return addresses.filter { seen.insert($0).inserted }
     }
 
+    // MARK: - Auth failure handling
+
+    private func markHostUnpaired(_ host: Host) {
+        host.serverCert = nil
+        host.pairState = PairState.unpaired.rawValue
+        host.state = HostState.online.rawValue
+        saveContext()
+    }
+
+    private func isAuthFailure(_ error: Error) -> Bool {
+        if case ServerResponseError.serverError(let code, _) = error, code == 401 {
+            return true
+        }
+        return false
+    }
+
     // MARK: - Persistence
 
     private func loadSavedHosts() {
@@ -316,41 +353,7 @@ final class DiscoveryService {
         let descriptor = FetchDescriptor<Host>()
         do {
             let allHosts = try modelContext.fetch(descriptor)
-
-            // Deduplicate by UUID
-            var seenUUIDs = Set<String>()
-            var uniqueHosts: [Host] = []
-            for host in allHosts {
-                if seenUUIDs.contains(host.uuid) {
-                    modelContext.delete(host)
-                } else {
-                    seenUUIDs.insert(host.uuid)
-                    uniqueHosts.append(host)
-                }
-            }
-
-            // Deduplicate by name
-            var seenNames = Set<String>()
-            var deduplicatedHosts: [Host] = []
-            for host in uniqueHosts {
-                if seenNames.contains(host.name) {
-                    modelContext.delete(host)
-                } else {
-                    seenNames.insert(host.name)
-                    deduplicatedHosts.append(host)
-                }
-            }
-
-            discoveredHosts = deduplicatedHosts
-
-            // Fix pairState for hosts that have a server cert but lost their pair status
-            var needsSave = false
-            for host in discoveredHosts where host.serverCert != nil && !host.isPaired {
-                host.pairState = PairState.paired.rawValue
-                log.info("Fixed pairState for '\(host.name)' (had cert but was not marked paired)")
-                needsSave = true
-            }
-            if needsSave { saveContext() }
+            discoveredHosts = allHosts
 
             // Saved hosts start as offline — Bonjour will update them to online
             for host in discoveredHosts {
@@ -368,10 +371,6 @@ final class DiscoveryService {
                     active=\(host.activeAddress ?? "nil") \
                     cert=\(host.serverCert.map { "\($0.count)B" } ?? "nil")
                     """)
-            }
-
-            if allHosts.count != deduplicatedHosts.count {
-                saveContext()
             }
         } catch {
             print("Failed to load saved hosts: \(error)")

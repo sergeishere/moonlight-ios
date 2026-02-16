@@ -15,6 +15,12 @@ actor HostPoller {
         let activeAddress: String
     }
 
+    enum PollOutcome: Sendable {
+        case success(PollResult)
+        case authFailure
+        case unreachable
+    }
+
     /// Starts polling a host by trying each known address.
     /// Stops automatically after `maxConsecutiveFailures` consecutive failures.
     func startPolling(
@@ -22,6 +28,7 @@ actor HostPoller {
         httpsPort: UInt16,
         serverCert: Data?,
         onResult: @MainActor @Sendable @escaping (PollResult) -> Void,
+        onAuthFailure: @MainActor @Sendable @escaping () -> Void,
         onStoppedByFailures: @MainActor @Sendable @escaping () -> Void
     ) {
         stopPolling()
@@ -30,14 +37,21 @@ actor HostPoller {
             var consecutiveFailures = 0
 
             while !Task.isCancelled {
-                if let result = await Self.poll(
+                let outcome = await Self.poll(
                     addresses: addresses,
                     httpsPort: httpsPort,
                     serverCert: serverCert
-                ) {
+                )
+
+                switch outcome {
+                case .success(let result):
                     consecutiveFailures = 0
                     await onResult(result)
-                } else {
+                case .authFailure:
+                    log.error("Auth failure — stopping poller")
+                    await onAuthFailure()
+                    return
+                case .unreachable:
                     consecutiveFailures += 1
                     if consecutiveFailures >= Self.maxConsecutiveFailures {
                         log.info("Poller stopped: \(Self.maxConsecutiveFailures) consecutive failures")
@@ -64,14 +78,16 @@ actor HostPoller {
         addresses: [String],
         httpsPort: UInt16 = 0,
         serverCert: Data?
-    ) async -> PollResult? {
+    ) async -> PollOutcome {
         // Sort: LAN addresses first for fastest response
         let sorted = addresses.sorted { lhs, _ in
             AddressUtils.isLANAddress(lhs)
         }
 
+        var hadAuthFailure = false
+
         for address in sorted {
-            if Task.isCancelled { return nil }
+            if Task.isCancelled { return .unreachable }
 
             let (addr, port) = AddressUtils.parseAddressAndPort(address)
             let isLAN = AddressUtils.isLANAddress(address)
@@ -90,17 +106,20 @@ actor HostPoller {
                 let elapsed = ContinuousClock.now - start
                 let net = isLAN ? "LAN" : "WAN"
                 log.debug("Poll \(address) [\(net) \(timeout, format: .fixed(precision: 1))s] -> OK in \(elapsed)")
-                return PollResult(serverInfo: serverInfo, activeAddress: address)
+                return .success(PollResult(serverInfo: serverInfo, activeAddress: address))
             } catch {
                 let elapsed = ContinuousClock.now - start
                 log.debug(
                     "Poll \(address) [\(isLAN ? "LAN" : "WAN")] -> FAIL in \(elapsed): \(error.localizedDescription)"
                 )
+                if isAuthFailure(error) {
+                    hadAuthFailure = true
+                }
                 continue
             }
         }
 
-        return nil
+        return hadAuthFailure ? .authFailure : .unreachable
     }
 
     /// Single poll attempt (for initial check or manual add).
@@ -115,5 +134,12 @@ actor HostPoller {
 
         let serverInfo = try await client.getServerInfo()
         return (serverInfo, address)
+    }
+
+    private static func isAuthFailure(_ error: Error) -> Bool {
+        if case ServerResponseError.serverError(let code, _) = error, code == 401 {
+            return true
+        }
+        return false
     }
 }

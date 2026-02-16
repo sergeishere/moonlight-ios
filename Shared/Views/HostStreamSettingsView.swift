@@ -3,28 +3,18 @@ import SwiftData
 import AVFoundation
 import VideoToolbox
 
-struct SettingsView: View {
+struct HostStreamSettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+
+    let host: Host
 
     @Query(filter: #Predicate<StreamSettings> { $0.isGlobalDefaults == true })
     private var globalSettings: [StreamSettings]
 
-    private var settings: StreamSettings {
-        if let existing = globalSettings.first {
-            return existing
-        }
-        let new = StreamSettings()
-        new.isGlobalDefaults = true
-        modelContext.insert(new)
-        return new
-    }
-
     // MARK: - Local State
 
     @State private var selectedResolution: ResolutionOption = .r720p
-    @State private var customWidth: Int32 = 0
-    @State private var customHeight: Int32 = 0
     @State private var selectedFramerate: FramerateOption = .fps60
     @State private var bitrateKbps: Int32 = 10000
     @State private var onscreenControls: OnScreenControlsSetting = .auto
@@ -37,7 +27,12 @@ struct SettingsView: View {
     @State private var enableHdr = false
     @State private var useFramePacing = false
     @State private var statsOverlay = false
-    @State private var showCustomResolution = false
+
+    #if os(visionOS)
+    @State private var visionBase: VisionBaseResolution = .r1080p
+    @State private var visionAspect: VisionAspectRatio = .normal
+    @State private var screenCurvature: ScreenCurvature = .gentle
+    #endif
 
     var body: some View {
         NavigationStack {
@@ -45,7 +40,9 @@ struct SettingsView: View {
                 resolutionSection
                 framerateSection
                 bitrateSection
-                #if !os(tvOS)
+                #if os(visionOS)
+                screenSection
+                #elseif !os(tvOS)
                 inputSection
                 #endif
                 gameSettingsSection
@@ -53,7 +50,7 @@ struct SettingsView: View {
                 videoSection
                 advancedSection
             }
-            .navigationTitle("Default Settings")
+            .navigationTitle(host.name)
             #if !os(tvOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
@@ -65,26 +62,53 @@ struct SettingsView: View {
                     }
                 }
             }
-            .onAppear { loadSettings() }
+            .onAppear { ensureSettingsAndLoad() }
         }
     }
 
     // MARK: - Resolution
 
     private var resolutionSection: some View {
+        #if os(visionOS)
         Section {
-            Picker("Resolution", selection: $selectedResolution) {
-                ForEach(availableResolutions, id: \.self) { res in
+            Picker("Base", selection: $visionBase) {
+                ForEach(availableVisionResolutions, id: \.self) { res in
                     Text(res.label).tag(res)
                 }
             }
-            .onChange(of: selectedResolution) { _, newValue in
-                if newValue == .custom {
-                    showCustomResolution = true
-                } else {
-                    updateBitrate()
+            .pickerStyle(.segmented)
+            .onChange(of: visionBase) { _, _ in
+                syncVisionResolution()
+                updateBitrate()
+            }
+
+            Picker("Aspect", selection: $visionAspect) {
+                ForEach(VisionAspectRatio.allCases, id: \.self) { ratio in
+                    Text(ratio.label).tag(ratio)
                 }
             }
+            .pickerStyle(.segmented)
+            .onChange(of: visionAspect) { _, _ in
+                syncVisionResolution()
+                updateBitrate()
+            }
+        } header: {
+            HStack {
+                Text("Resolution")
+                Spacer()
+                Text("\(visionAspect.computedWidth(baseWidth: visionBase.baseWidth)) × \(visionBase.baseHeight)")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        #else
+        Section {
+            Picker("Resolution", selection: $selectedResolution) {
+                ForEach(availableResolutions, id: \.self) { res in
+                    Text(res == .nativeFull ? "Native" : res.label).tag(res)
+                }
+            }
+            .pickerStyle(.segmented)
+            .onChange(of: selectedResolution) { _, _ in updateBitrate() }
         } header: {
             HStack {
                 Text("Resolution")
@@ -93,22 +117,7 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .alert("Custom Resolution", isPresented: $showCustomResolution) {
-            TextField("Width", value: $customWidth, format: .number)
-                .keyboardType(.numberPad)
-            TextField("Height", value: $customHeight, format: .number)
-                .keyboardType(.numberPad)
-            Button("OK") {
-                customWidth = max(256, min(customWidth, maxResolutionDimension))
-                customHeight = max(256, min(customHeight, maxResolutionDimension))
-                updateBitrate()
-            }
-            Button("Cancel", role: .cancel) {
-                if customWidth == 0 || customHeight == 0 {
-                    selectedResolution = .r720p
-                }
-            }
-        }
+        #endif
     }
 
     // MARK: - Framerate
@@ -120,9 +129,8 @@ struct SettingsView: View {
                     Text(fps.label).tag(fps)
                 }
             }
-            .onChange(of: selectedFramerate) { _, _ in
-                updateBitrate()
-            }
+            .pickerStyle(.segmented)
+            .onChange(of: selectedFramerate) { _, _ in updateBitrate() }
         }
     }
 
@@ -144,9 +152,24 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Screen (visionOS)
+
+    #if os(visionOS)
+    private var screenSection: some View {
+        Section("Screen") {
+            Picker("Curvature", selection: $screenCurvature) {
+                ForEach(ScreenCurvature.allCases, id: \.self) { c in
+                    Text(c.label).tag(c)
+                }
+            }
+            .pickerStyle(.segmented)
+        }
+    }
+    #endif
+
     // MARK: - Input
 
-    #if !os(tvOS)
+    #if !os(tvOS) && !os(visionOS)
     private var inputSection: some View {
         Section("Input") {
             Picker("Touch Mode", selection: $touchMode) {
@@ -197,6 +220,7 @@ struct SettingsView: View {
                 }
                 Text("Auto").tag(PreferredCodec.auto)
             }
+            .pickerStyle(.segmented)
 
             if hdrCapable {
                 Toggle("HDR", isOn: $enableHdr)
@@ -221,7 +245,7 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Resolution Options
+    // MARK: - Device Native Resolution
 
     #if !os(visionOS)
     private var deviceNativeHeight: Int32 {
@@ -229,11 +253,11 @@ struct SettingsView: View {
     }
     #endif
 
+    // MARK: - Available Options
+
     private var availableResolutions: [ResolutionOption] {
         #if os(visionOS)
-        var options: [ResolutionOption] = [.r720p, .r1080p, .r1440p, .r4k]
-        options.append(.custom)
-        return options
+        return [.r720p, .r1080p, .r1440p, .r4k]  // unused on visionOS (uses VisionBaseResolution pickers)
         #else
         let nativeH = deviceNativeHeight
         var options: [ResolutionOption] = []
@@ -242,21 +266,21 @@ struct SettingsView: View {
             if res.height > 1080 && !hevcSupported { continue }
             options.append(res)
         }
-        #if !os(tvOS)
-        options.append(.nativeSafe)
         let nativeMatchesStandard = [ResolutionOption.r360p, .r480p, .r720p, .r1080p, .r1440p, .r4k].contains {
             $0.width == ResolutionOption.nativeFull.width && $0.height == ResolutionOption.nativeFull.height
         }
         if !nativeMatchesStandard {
             options.append(.nativeFull)
         }
-        #endif
-        options.append(.custom)
         return options
         #endif
     }
 
-    // MARK: - Framerate Options
+    #if os(visionOS)
+    private var availableVisionResolutions: [VisionBaseResolution] {
+        [.r720p, .r1080p, .r2k, .r4k, .r5k, .r8k]
+    }
+    #endif
 
     private var availableFramerates: [FramerateOption] {
         var options: [FramerateOption] = [.fps30, .fps60]
@@ -291,27 +315,25 @@ struct SettingsView: View {
         hevcSupported && (AVPlayer.availableHDRModes.rawValue & AVPlayer.HDRMode.hdr10.rawValue) != 0
     }
 
-    private var maxResolutionDimension: Int32 {
-        hevcSupported ? 8192 : 4096
-    }
-
     // MARK: - Effective Resolution
 
     private var effectiveWidth: Int32 {
-        if selectedResolution == .custom {
-            return customWidth > 0 ? customWidth : 1280
-        }
+        #if os(visionOS)
+        return visionAspect.computedWidth(baseWidth: visionBase.baseWidth)
+        #else
         return selectedResolution.width
+        #endif
     }
 
     private var effectiveHeight: Int32 {
-        if selectedResolution == .custom {
-            return customHeight > 0 ? customHeight : 720
-        }
+        #if os(visionOS)
+        return visionBase.baseHeight
+        #else
         return selectedResolution.height
+        #endif
     }
 
-    // MARK: - Bitrate Calculation
+    // MARK: - Bitrate
 
     private static let bitrateTable: [Int32] = [
         500, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 6000, 7000,
@@ -372,49 +394,56 @@ struct SettingsView: View {
         bitrateKbps = min(defaultBitrate, 100000)
     }
 
+    // MARK: - visionOS helpers
+
+    #if os(visionOS)
+    private func syncVisionResolution() {
+        // Update the underlying resolution from visionOS pickers
+        // (selectedResolution is not used on visionOS)
+    }
+    #endif
+
     // MARK: - Load / Save
 
+    private func ensureSettingsAndLoad() {
+        if host.streamSettings == nil {
+            let source = globalSettings.first ?? StreamSettings()
+            let copy = StreamSettings.makeCopy(from: source)
+            copy.host = host
+            modelContext.insert(copy)
+            host.streamSettings = copy
+        }
+        loadSettings()
+    }
+
     private func loadSettings() {
-        let s = settings
+        guard let s = host.streamSettings else { return }
 
         // Resolution
-        let w = s.width
-        let h = s.height
-        selectedResolution = ResolutionOption.from(width: w, height: h)
-        if selectedResolution == .custom {
-            customWidth = w
-            customHeight = h
-        }
+        #if os(visionOS)
+        visionBase = VisionBaseResolution.from(width: s.width, height: s.height)
+        visionAspect = VisionAspectRatio.from(width: s.width, baseWidth: visionBase.baseWidth)
+        screenCurvature = s.curvature
+        #else
+        selectedResolution = ResolutionOption.from(width: s.width, height: s.height)
+        #endif
 
-        // Framerate
         selectedFramerate = FramerateOption.from(value: s.framerate)
-
-        // Bitrate
         bitrateKbps = s.bitrate
-
-        // Input
         onscreenControls = s.onscreenControlsLevel
         touchMode = s.absoluteTouchMode ? .absolute : .relative
-
-        // Game settings
         optimizeGames = s.optimizeGames
         multiController = s.multiController
         swapABXYButtons = s.swapABXYButtons
-
-        // Audio
         playAudioOnPC = s.playAudioOnPC
-
-        // Video
         preferredCodec = s.codec
         enableHdr = s.enableHdr
         useFramePacing = s.useFramePacing
-
-        // Advanced
         statsOverlay = s.statsOverlay
     }
 
     private func saveSettings() {
-        let s = settings
+        guard let s = host.streamSettings else { return }
 
         s.width = effectiveWidth
         s.height = effectiveHeight
@@ -430,6 +459,10 @@ struct SettingsView: View {
         s.enableHdr = enableHdr
         s.useFramePacing = useFramePacing
         s.statsOverlay = statsOverlay
+
+        #if os(visionOS)
+        s.curvature = screenCurvature
+        #endif
 
         // Sync to UserDefaults for Obj-C code
         let defaults = UserDefaults.standard
@@ -452,133 +485,8 @@ struct SettingsView: View {
     }
 }
 
-// MARK: - Supporting Types
+// MARK: - Private Types
 
 private enum TouchMode {
     case relative, absolute
-}
-
-enum ResolutionOption: Hashable {
-    case r360p, r480p, r720p, r1080p, r1440p, r4k
-    case nativeSafe, nativeFull
-    case custom
-
-    var label: String {
-        switch self {
-        case .r360p: "360p"
-        case .r480p: "480p"
-        case .r720p: "720p"
-        case .r1080p: "1080p"
-        case .r1440p: "1440p"
-        case .r4k: "4K"
-        case .nativeSafe: "Native (Safe Area)"
-        case .nativeFull: "Native (Full Screen)"
-        case .custom: "Custom"
-        }
-    }
-
-    var width: Int32 {
-        switch self {
-        case .r360p: 640
-        case .r480p: 854
-        case .r720p: 1280
-        case .r1080p: 1920
-        case .r1440p: 2560
-        case .r4k: 3840
-        case .nativeSafe: Int32(nativeSafeSize.width)
-        case .nativeFull: Int32(nativeFullSize.width)
-        case .custom: 0
-        }
-    }
-
-    var height: Int32 {
-        switch self {
-        case .r360p: 360
-        case .r480p: 480
-        case .r720p: 720
-        case .r1080p: 1080
-        case .r1440p: 1440
-        case .r4k: 2160
-        case .nativeSafe: Int32(nativeSafeSize.height)
-        case .nativeFull: Int32(nativeFullSize.height)
-        case .custom: 0
-        }
-    }
-
-    static func from(width: Int32, height: Int32) -> ResolutionOption {
-        for option in [r360p, r480p, r720p, r1080p, r1440p, r4k] {
-            if option.width == width && option.height == height {
-                return option
-            }
-        }
-        #if !os(tvOS) && !os(visionOS)
-        if nativeFull.width == width && nativeFull.height == height {
-            return .nativeFull
-        }
-        if nativeSafe.width == width && nativeSafe.height == height {
-            return .nativeSafe
-        }
-        #endif
-        return .custom
-    }
-
-    private var nativeSafeSize: CGSize {
-        #if os(visionOS)
-        CGSize(width: 1920, height: 1080)
-        #else
-        let window = UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .first?.windows.first
-        let scale = window?.screen.scale ?? 2.0
-        let frame = window?.frame ?? CGRect(x: 0, y: 0, width: 1920, height: 1080)
-        let insets = window?.safeAreaInsets ?? .zero
-        return CGSize(
-            width: (frame.width - insets.left - insets.right) * scale,
-            height: frame.height * scale
-        )
-        #endif
-    }
-
-    private var nativeFullSize: CGSize {
-        #if os(visionOS)
-        CGSize(width: 1920, height: 1080)
-        #else
-        let bounds = UIScreen.main.nativeBounds
-        return CGSize(
-            width: max(bounds.width, bounds.height),
-            height: min(bounds.width, bounds.height)
-        )
-        #endif
-    }
-}
-
-enum FramerateOption: Hashable {
-    case fps30, fps60, fps90, fps120
-
-    var label: String {
-        switch self {
-        case .fps30: "30 FPS"
-        case .fps60: "60 FPS"
-        case .fps90: "90 FPS"
-        case .fps120: "120 FPS"
-        }
-    }
-
-    var value: Int32 {
-        switch self {
-        case .fps30: 30
-        case .fps60: 60
-        case .fps90: 90
-        case .fps120: 120
-        }
-    }
-
-    static func from(value: Int32) -> FramerateOption {
-        switch value {
-        case 30: .fps30
-        case 90: .fps90
-        case 120: .fps120
-        default: .fps60
-        }
-    }
 }

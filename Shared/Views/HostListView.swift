@@ -8,9 +8,13 @@ struct HostListView: View {
 
     @State private var showingAddHost = false
     @State private var showingSettings = false
+    @State private var showingHostSettings = false
     @State private var hostToDelete: Host?
     @State private var showDeleteConfirmation = false
     @State private var hostForInfo: Host?
+
+    @Query(filter: #Predicate<StreamSettings> { $0.isGlobalDefaults == true })
+    private var globalSettings: [StreamSettings]
 
     var body: some View {
         NavigationStack {
@@ -39,8 +43,10 @@ struct HostListView: View {
                     }
                 }
                 ToolbarItem(placement: .navigation) {
-                    Button("Settings", systemImage: "gearshape") {
-                        showingSettings = true
+                    if viewModel.selectedHost == nil {
+                        Button("Settings", systemImage: "gearshape") {
+                            showingSettings = true
+                        }
                     }
                 }
             }
@@ -52,6 +58,11 @@ struct HostListView: View {
         .onDisappear { viewModel.stopDiscovery() }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
+        }
+        .sheet(isPresented: $showingHostSettings) {
+            if let host = viewModel.selectedHost {
+                HostStreamSettingsView(host: host)
+            }
         }
         .fullScreenCover(isPresented: Binding(
             get: { viewModel.streamConfig != nil },
@@ -103,7 +114,7 @@ struct HostListView: View {
         Group {
             if viewModel.hosts.isEmpty {
                 ContentUnavailableView {
-                    Label("No Computers Found", systemImage: "desktopcomputer.slash")
+                    Label("No Computers Found", systemImage: "display.trianglebadge.exclamationmark")
                 } description: {
                     Text("Make sure your gaming PC is on and Sunshine or GeForce Experience is running.")
                 } actions: {
@@ -112,7 +123,7 @@ struct HostListView: View {
             } else {
                 GeometryReader { geometry in
                     ScrollView(.horizontal) {
-                        HStack(spacing: 20) {
+                        HStack(spacing: 30) {
                             ForEach(viewModel.hosts, id: \.uuid) { host in
                                 Button {
                                     Task { await viewModel.selectHost(host) }
@@ -128,7 +139,7 @@ struct HostListView: View {
                         }
                         .frame(maxHeight: .infinity)
                     }
-                    .contentMargins(.horizontal, (geometry.size.width - 195) / 2)
+                    .contentMargins(.horizontal, (geometry.size.width - 300) / 2)
                     .scrollIndicators(.hidden)
                 }
             }
@@ -196,24 +207,85 @@ struct HostListView: View {
                 description: Text("No applications found on \(host.name).")
             )
         } else {
-            GeometryReader { geometry in
-                ScrollView(.horizontal) {
-                    HStack(spacing: 20) {
-                        ForEach(viewModel.apps, id: \.id) { app in
-                            Button {
-                                launchStream(app: app)
-                            } label: {
-                                AppCardView(app: app, hostUUID: host.uuid)
+            VStack(spacing: 0) {
+                GeometryReader { geometry in
+                    let margin = (geometry.size.width - 300) / 2
+                    let placeholderCount = Self.placeholderCount(
+                        appCount: viewModel.apps.count, screenWidth: geometry.size.width
+                    )
+
+                    ScrollView(.horizontal) {
+                        HStack(spacing: 30) {
+                            ForEach(viewModel.apps, id: \.id) { app in
+                                Button {
+                                    launchStream(app: app)
+                                } label: {
+                                    AppCardView(app: app, hostUUID: host.uuid)
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
+                        .overlay(alignment: .trailing) {
+                            if placeholderCount > 0 {
+                                HStack(spacing: 30) {
+                                    ForEach(0..<placeholderCount, id: \.self) { _ in
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .fill(.ultraThinMaterial)
+                                            .opacity(0.4)
+                                            .frame(width: 300, height: 450)
+                                    }
+                                }
+                                .offset(x: CGFloat(placeholderCount) * 330)
+                            }
+                        }
+                        .frame(maxHeight: .infinity)
                     }
-                    .frame(maxHeight: .infinity)
+                    .scrollClipDisabled()
+                    .contentMargins(.horizontal, margin)
+                    .scrollIndicators(.hidden)
                 }
-                .contentMargins(.horizontal, (geometry.size.width - 195) / 2)
-                .scrollIndicators(.hidden)
+                .clipped()
+
+                settingsCapsule(for: host)
+                    .padding(.bottom, 16)
             }
         }
+    }
+
+    // MARK: - Placeholder Cards
+
+    private static func placeholderCount(appCount: Int, screenWidth: CGFloat) -> Int {
+        let cardSlot: CGFloat = 330 // 300 card + 30 spacing
+        let slotsVisible = Int(ceil(screenWidth / cardSlot)) + 1
+        return max(0, slotsVisible - appCount)
+    }
+
+    // MARK: - Settings Capsule
+
+    @ViewBuilder
+    private func settingsCapsule(for host: Host) -> some View {
+        Button { showingHostSettings = true } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "gearshape")
+                Text(settingsSummary(for: host))
+            }
+            .font(.body)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .background(.regularMaterial, in: Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func settingsSummary(for host: Host) -> String {
+        let s = host.streamSettings ?? globalSettings.first ?? StreamSettings()
+        var parts = ["\(s.width)×\(s.height)", "\(s.framerate)fps"]
+        if s.enableHdr { parts.append("HDR") }
+        let codec = s.codec
+        if codec != .auto {
+            parts.append(codec == .hevc ? "HEVC" : codec == .av1 ? "AV1" : "H.264")
+        }
+        return parts.joined(separator: ", ")
     }
 
     // MARK: - Context Menu
@@ -254,11 +326,9 @@ struct HostListView: View {
 
     private func launchStream(app: App) {
         guard let host = viewModel.selectedHost else { return }
-        let settings = allSettings.first ?? StreamSettings()
+        let settings = host.streamSettings ?? globalSettings.first ?? StreamSettings()
         viewModel.launchApp(app, host: host, settings: settings)
     }
-
-    @Query private var allSettings: [StreamSettings]
 
     // MARK: - Helpers
 

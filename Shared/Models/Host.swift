@@ -31,12 +31,16 @@ final class Host {
     @Relationship(deleteRule: .cascade, inverse: \App.host)
     var appList: [App] = []
 
+    @Relationship(deleteRule: .cascade)
+    var streamSettings: StreamSettings?
+
+    var httpsPort: UInt16 = 0
+
     // MARK: - Transient (runtime-only) state
 
     @Transient var state: Int = 0 // StateUnknown
     @Transient var activeAddress: String?
     @Transient var currentGame: String = "0"
-    @Transient var httpsPort: UInt16 = 0
     @Transient var isNvidiaServerSoftware: Bool = false
     @Transient var astrumVersion: Int = 0
     @Transient var updatePending: Bool = false

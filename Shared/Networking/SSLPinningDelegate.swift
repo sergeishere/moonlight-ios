@@ -1,5 +1,8 @@
 import Foundation
 import Security
+import os
+
+private let log = Logger(subsystem: "com.moonlight", category: "SSL")
 
 final class SSLPinningDelegate: NSObject, URLSessionDelegate, Sendable {
 
@@ -58,16 +61,9 @@ final class SSLPinningDelegate: NSObject, URLSessionDelegate, Sendable {
 
     private func handleClientCertificate() -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         guard let identity = CryptoManager.getIdentityFromKeychain() else {
-            // Try legacy PKCS12 migration
-            if let p12Data = CryptoManager.readP12FromFile() {
-                CryptoManager.migratePKCS12ToKeychain(p12Data, password: "limelight")
-                if let identity = CryptoManager.getIdentityFromKeychain() {
-                    return makeClientCredential(identity: identity)
-                }
-            }
+            log.error("No client identity in keychain")
             return (.cancelAuthenticationChallenge, nil)
         }
-
         return makeClientCredential(identity: identity)
     }
 

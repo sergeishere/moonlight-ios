@@ -1,4 +1,7 @@
 import SwiftUI
+import os
+
+private let log = Logger(subsystem: "com.moonlight", category: "AppCard")
 
 struct AppCardView: View {
     let app: App
@@ -14,12 +17,15 @@ struct AppCardView: View {
                 fallbackContent
             }
         }
-        .frame(width: 195, height: 260)
+        .frame(width: 300, height: 450)
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .contentShape(.hoverEffect, RoundedRectangle(cornerRadius: 20))
         .hoverEffect()
         .task(id: app.id) {
-            boxArt = await BoxArtCache.shared.image(hostUUID: hostUUID, appId: app.id)
+            log.debug("[\(self.app.id)] task fired, requesting image")
+            let img = await BoxArtCache.shared.image(hostUUID: hostUUID, appId: app.id)
+            log.debug("[\(self.app.id)] result: \(img != nil ? "got image" : "nil")")
+            boxArt = img
         }
     }
 
@@ -28,7 +34,7 @@ struct AppCardView: View {
             Image(uiImage: image)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
-                .frame(width: 195, height: 260)
+                .frame(width: 300, height: 450)
 
             LinearGradient(
                 colors: [.clear, .black.opacity(0.7)],
@@ -59,7 +65,7 @@ struct AppCardView: View {
             Spacer()
         }
         .padding(20)
-        .frame(width: 195, height: 260)
+        .frame(width: 300, height: 450)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20))
     }
 }

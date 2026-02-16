@@ -1,6 +1,9 @@
 import SwiftUI
 import SwiftData
 import VideoToolbox
+import os
+
+private let log = Logger(subsystem: "com.moonlight", category: "HostListVM")
 
 @Observable
 @MainActor
@@ -127,31 +130,46 @@ final class HostListViewModel {
         }
 
         // Refresh from server in background
-        let appInfos = await connectionService.fetchAppList(for: host)
-        if !appInfos.isEmpty {
-            var updatedApps: [App] = []
-            for info in appInfos.sorted(by: { $0.name < $1.name }) {
-                if let existing = host.appList.first(where: { $0.id == info.id }) {
-                    existing.updateFromAppInfo(info)
-                    updatedApps.append(existing)
-                } else {
-                    let app = App(host: host)
-                    app.updateFromAppInfo(info)
-                    host.appList.append(app)
-                    updatedApps.append(app)
+        let result = await connectionService.fetchAppList(for: host)
+        switch result {
+        case .success(let appInfos):
+            if !appInfos.isEmpty {
+                var updatedApps: [App] = []
+                for info in appInfos.sorted(by: { $0.name < $1.name }) {
+                    if let existing = host.appList.first(where: { $0.id == info.id }) {
+                        existing.updateFromAppInfo(info)
+                        updatedApps.append(existing)
+                    } else {
+                        let app = App(host: host)
+                        app.updateFromAppInfo(info)
+                        host.appList.append(app)
+                        updatedApps.append(app)
+                    }
                 }
+                apps = updatedApps
             }
-            apps = updatedApps
+        case .authFailure:
+            log.error("Auth failure for \(host.name) — marking unpaired")
+            host.serverCert = nil
+            host.pairState = PairState.unpaired.rawValue
+            discoveryService.saveContext()
+            selectedHost = nil
+            apps = []
+        case .error:
+            break // keep showing cached apps
         }
         loadingApps = false
 
-        boxArtTask?.cancel()
-        boxArtTask = Task { await loadBoxArt(for: apps, host: host) }
+        if case .success = result {
+            boxArtTask?.cancel()
+            boxArtTask = Task { await loadBoxArt(for: apps, host: host) }
+        }
     }
 
     private func loadBoxArt(for apps: [App], host: Host) async {
         let hostUUID = host.uuid
         let client = MoonlightClient(host: host)
+        log.info("loadBoxArt: \(apps.count) apps, host=\(hostUUID)")
 
         // Filter to only apps missing from cache
         var toDownload: [String] = []
@@ -160,13 +178,27 @@ final class HostListViewModel {
                 toDownload.append(app.id)
             }
         }
+        log.info("loadBoxArt: \(toDownload.count) to download, \(apps.count - toDownload.count) cached")
 
         // Download sequentially to avoid saturating the server
         for appId in toDownload {
-            guard !Task.isCancelled else { return }
-            guard let data = try? await client.getAppAsset(appId: appId) else { continue }
-            await BoxArtCache.shared.store(data, hostUUID: hostUUID, appId: appId)
+            guard !Task.isCancelled else {
+                log.debug("loadBoxArt: cancelled")
+                return
+            }
+            do {
+                let data = try await client.getAppAsset(appId: appId)
+                log.info("[\(appId)] downloaded \(data.count) bytes")
+                if data.count < 1000 {
+                    let preview = String(data: data, encoding: .utf8) ?? "(binary)"
+                    log.warning("[\(appId)] response body: \(preview)")
+                }
+                await BoxArtCache.shared.store(data, hostUUID: hostUUID, appId: appId)
+            } catch {
+                log.error("[\(appId)] download failed: \(error.localizedDescription)")
+            }
         }
+        log.info("loadBoxArt: done")
     }
 
     // MARK: - Streaming
@@ -183,7 +215,7 @@ final class HostListViewModel {
         config.height = settings.height
         config.frameRate = settings.framerate
         config.bitRate = settings.bitrate
-        config.audioConfiguration = Self.packedAudioConfig(settings.audioConfig)
+        config.audioConfiguration = settings.audioConfig
         config.optimizeGameSettings = settings.optimizeGames
         config.multiController = settings.multiController
         config.swapABXYButtons = settings.swapABXYButtons
@@ -274,20 +306,4 @@ final class HostListViewModel {
         pairingService.cancelPairing()
     }
 
-    // MARK: - Audio config helpers
-
-    /// Ensures audioConfig is in packed format: (channelMask << 16) | (channelCount << 8) | 0xCA
-    /// Handles legacy values that stored raw channel count (2, 6, 8).
-    private static func packedAudioConfig(_ value: Int32) -> Int32 {
-        // Already packed (has magic byte 0xCA)
-        if value & 0xFF == 0xCA { return value }
-
-        // Legacy raw channel count → packed format
-        switch value {
-        case 2:  return (0x3 << 16)   | (2 << 8) | 0xCA  // stereo
-        case 6:  return (0x3F << 16)  | (6 << 8) | 0xCA  // 5.1
-        case 8:  return (0x63F << 16) | (8 << 8) | 0xCA  // 7.1
-        default: return (0x3 << 16)   | (2 << 8) | 0xCA  // fallback to stereo
-        }
-    }
 }

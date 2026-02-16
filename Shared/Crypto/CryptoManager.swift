@@ -39,9 +39,6 @@ import SwiftASN1
         return readCryptoObject("client.key")
     }
 
-    @objc static func readP12FromFile() -> Data? {
-        return readCryptoObject("client.p12")
-    }
 
     // MARK: - Hashing
 
@@ -256,9 +253,6 @@ import SwiftASN1
         return CertificateGenerator.getIdentityFromKeychain()
     }
 
-    @objc static func migratePKCS12ToKeychain(_ p12Data: Data, password: String) -> Bool {
-        return CertificateGenerator.migratePKCS12ToKeychain(p12Data, password: password)
-    }
 
     // MARK: - Internal Helpers
 

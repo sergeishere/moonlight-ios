@@ -37,7 +37,7 @@
 @end
 #endif
 
-@interface StreamFrameViewController () <StreamConnectionDelegate, ControllerSupportDelegate>
+@interface StreamFrameViewController () <StreamConnectionDelegate, ControllerSupportDelegate, UserInteractionDelegate>
 @end
 
 @implementation StreamFrameViewController {

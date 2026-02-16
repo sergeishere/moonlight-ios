@@ -9,8 +9,13 @@
 #import "StreamView.h"
 #import <objc/runtime.h>
 #include <Limelight.h>
-#import "ControllerSupport.h"
 #import "KeyboardSupport.h"
+
+#if __has_include("Moonlight-Swift.h")
+#import "Moonlight-Swift.h"
+#elif __has_include("Moonlight_TV-Swift.h")
+#import "Moonlight_TV-Swift.h"
+#endif
 #import "RelativeTouchHandler.h"
 #import "AbsoluteTouchHandler.h"
 #import "KeyboardInputField.h"

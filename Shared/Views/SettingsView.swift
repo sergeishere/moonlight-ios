@@ -24,7 +24,7 @@ struct SettingsView: View {
     @State private var customHeight: Int32 = 0
     @State private var selectedFramerate: FramerateOption = .fps60
     @State private var bitrateKbps: Int32 = 10000
-    @State private var onscreenControls: OnScreenControlsLevel = .auto
+    @State private var onscreenControls: OnScreenControlsSetting = .auto
     @State private var touchMode: TouchMode = .relative
     @State private var optimizeGames = true
     @State private var multiController = true
@@ -154,10 +154,10 @@ struct SettingsView: View {
             }
 
             Picker("On-Screen Controls", selection: $onscreenControls) {
-                Text("Off").tag(OnScreenControlsLevel.off)
-                Text("Auto").tag(OnScreenControlsLevel.auto)
-                Text("Simple").tag(OnScreenControlsLevel.simple)
-                Text("Full").tag(OnScreenControlsLevel.full)
+                Text("Off").tag(OnScreenControlsSetting.off)
+                Text("Auto").tag(OnScreenControlsSetting.auto)
+                Text("Simple").tag(OnScreenControlsSetting.simple)
+                Text("Full").tag(OnScreenControlsSetting.full)
             }
             .disabled(touchMode == .absolute)
         }

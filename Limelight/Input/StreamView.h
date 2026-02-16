@@ -6,7 +6,8 @@
 //  Copyright (c) 2014 Moonlight Stream. All rights reserved.
 //
 
-#import "ControllerSupport.h"
+@class ControllerSupport;
+
 #import "OnScreenControls.h"
 #import "StreamConfiguration.h"
 

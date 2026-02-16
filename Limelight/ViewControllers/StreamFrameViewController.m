@@ -9,7 +9,6 @@
 #if !TARGET_OS_VISION
 
 #import "StreamFrameViewController.h"
-#import "ControllerSupport.h"
 #import "MetalViewController.h"
 #import "Utils.h"
 
@@ -38,7 +37,7 @@
 @end
 #endif
 
-@interface StreamFrameViewController () <StreamConnectionDelegate>
+@interface StreamFrameViewController () <StreamConnectionDelegate, ControllerSupportDelegate>
 @end
 
 @implementation StreamFrameViewController {

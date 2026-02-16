@@ -8,9 +8,15 @@
 
 #import "OnScreenControls.h"
 #import "StreamView.h"
-#import "ControllerSupport.h"
-#import "Controller.h"
 #include "Limelight.h"
+
+#if __has_include("Moonlight-Swift.h")
+#import "Moonlight-Swift.h"
+#elif __has_include("Moonlight_TV-Swift.h")
+#import "Moonlight_TV-Swift.h"
+#elif __has_include("Moonlight_Vision-Swift.h")
+#import "Moonlight_Vision-Swift.h"
+#endif
 
 #define UPDATE_BUTTON(x, y) (buttonFlags = \
 (y) ? (buttonFlags | (x)) : (buttonFlags & ~(x)))

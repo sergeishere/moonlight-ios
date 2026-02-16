@@ -9,7 +9,7 @@
 
 #import "Utils.h"
 #import "StreamConfiguration.h"
-#import "ControllerSupport.h"
+#import "OnScreenControls.h"
 #import "AV1FormatHelper.h"
 #import "AudioRenderer.h"
 #import "FrameQueue.h"

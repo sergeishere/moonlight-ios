@@ -20,9 +20,9 @@
 #if TARGET_OS_TV
 @import GameController;
 
-@interface StreamFrameViewController : GCEventViewController <ControllerSupportDelegate, UserInteractionDelegate, UIScrollViewDelegate>
+@interface StreamFrameViewController : GCEventViewController <UserInteractionDelegate, UIScrollViewDelegate>
 #else
-@interface StreamFrameViewController : UIViewController <ControllerSupportDelegate, UserInteractionDelegate, UIScrollViewDelegate>
+@interface StreamFrameViewController : UIViewController <UserInteractionDelegate, UIScrollViewDelegate>
 #endif
 @property (nonatomic) StreamConfiguration* streamConfig;
 @property (nonatomic, copy) void (^onDismiss)(void);

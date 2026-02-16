@@ -7,7 +7,7 @@ enum PreferredCodec: Int, Codable, CaseIterable {
     case av1 = 3
 }
 
-enum OnScreenControlsLevel: Int, Codable, CaseIterable {
+enum OnScreenControlsSetting: Int, Codable, CaseIterable {
     case off = 0
     case auto = 1
     case simple = 2

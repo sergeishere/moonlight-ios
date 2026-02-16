@@ -21,7 +21,7 @@
 
 #include <Limelight.h>
 
-@interface VisionStreamViewController () <StreamConnectionDelegate>
+@interface VisionStreamViewController () <StreamConnectionDelegate, ControllerSupportDelegate>
 @end
 
 @implementation VisionStreamViewController {

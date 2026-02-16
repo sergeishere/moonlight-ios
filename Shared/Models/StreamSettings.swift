@@ -32,8 +32,8 @@ final class StreamSettings {
         set { preferredCodec = newValue.rawValue }
     }
 
-    var onscreenControlsLevel: OnScreenControlsLevel {
-        get { OnScreenControlsLevel(rawValue: Int(onscreenControls)) ?? .auto }
+    var onscreenControlsLevel: OnScreenControlsSetting {
+        get { OnScreenControlsSetting(rawValue: Int(onscreenControls)) ?? .auto }
         set { onscreenControls = Int32(newValue.rawValue) }
     }
 }

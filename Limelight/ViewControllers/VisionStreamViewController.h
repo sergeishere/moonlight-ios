@@ -11,13 +11,12 @@
 #if TARGET_OS_VISION
 
 #import "StreamConfiguration.h"
-#import "ControllerSupport.h"
 
 #import <UIKit/UIKit.h>
 
 #define CONN_TEST_SERVER "ios.conntest.moonlight-stream.org"
 
-@interface VisionStreamViewController : UIViewController <ControllerSupportDelegate>
+@interface VisionStreamViewController : UIViewController
 
 @property (nonatomic) StreamConfiguration* streamConfig;
 @property (nonatomic, copy) void (^onDismiss)(void);

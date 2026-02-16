@@ -9,12 +9,15 @@
 #if !TARGET_OS_VISION
 
 #import "StreamFrameViewController.h"
-#import "VideoDecoderRenderer.h"
-#import "StreamManager.h"
 #import "ControllerSupport.h"
-#import "DataManager.h"
 #import "MetalViewController.h"
 #import "Utils.h"
+
+#if __has_include("Moonlight-Swift.h")
+#import "Moonlight-Swift.h"
+#elif __has_include("Moonlight_TV-Swift.h")
+#import "Moonlight_TV-Swift.h"
+#endif
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -27,16 +30,20 @@
 #import <AVKit/UIWindow.h>
 #endif
 
+#if TARGET_OS_TV
 @interface AVDisplayCriteria()
 @property(readonly) int videoDynamicRange;
 @property(readonly, nonatomic) float refreshRate;
 - (id)initWithRefreshRate:(float)arg1 videoDynamicRange:(int)arg2;
 @end
+#endif
+
+@interface StreamFrameViewController () <StreamConnectionDelegate>
+@end
 
 @implementation StreamFrameViewController {
     ControllerSupport *_controllerSupport;
-    StreamManager *_streamMan;
-    TemporarySettings *_settings;
+    StreamSession *_streamSession;
     NSTimer *_inactivityTimer;
     NSTimer *_statsUpdateTimer;
     UITapGestureRecognizer *_menuTapGestureRecognizer;
@@ -85,8 +92,6 @@
     [self.navigationController setNavigationBarHidden:YES animated:YES];
 
     [UIApplication sharedApplication].idleTimerDisabled = YES;
-
-    _settings = [[[DataManager alloc] init] getSettings];
 
     _stageLabel = [[UILabel alloc] init];
     [_stageLabel setUserInteractionEnabled:NO];
@@ -160,13 +165,11 @@
             framerate:self.streamConfig.frameRate
             enableHdr:NO];
 
-    // Create StreamManager with the MetalViewController's frame queue
-    _streamMan = [[StreamManager alloc] initWithConfig:self.streamConfig
-                                            renderView:_streamView
-                                            frameQueue:_metalViewController.frameQueue
-                                   connectionCallbacks:self];
-    NSOperationQueue* opQueue = [[NSOperationQueue alloc] init];
-    [opQueue addOperation:_streamMan];
+    // Create StreamSession with the MetalViewController's frame queue
+    _streamSession = [[StreamSession alloc] initWithConfig:self.streamConfig
+                                                frameQueue:_metalViewController.frameQueue
+                                                  delegate:self];
+    [_streamSession start];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -184,7 +187,7 @@
                                                object: nil];
 
     // Only enable scroll and zoom in absolute touch mode
-    if (_settings.absoluteTouchMode) {
+    if (self.streamConfig.absoluteTouchMode) {
         _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
 #if !TARGET_OS_TV
         [_scrollView.panGestureRecognizer setMinimumNumberOfTouches:2];
@@ -216,7 +219,7 @@
         [_controllerSupport cleanup];
         [UIApplication sharedApplication].idleTimerDisabled = NO;
         [_metalViewController shutdown];
-        [_streamMan stopStream];
+        [_streamSession stop];
         if (_inactivityTimer != nil) {
             [_inactivityTimer invalidate];
             _inactivityTimer = nil;
@@ -226,7 +229,7 @@
 }
 
 - (void)updateStatsOverlay {
-    NSString* overlayText = [self->_streamMan getStatsOverlayText];
+    NSString* overlayText = [self->_streamSession.connection getStatsOverlayText];
 
     dispatch_async(dispatch_get_main_queue(), ^{
         [self updateOverlayText:overlayText];
@@ -347,7 +350,7 @@
 
         [self->_controllerSupport connectionEstablished];
 
-        if (self->_settings.statsOverlay) {
+        if (self->_streamConfig.statsOverlay) {
             self->_statsUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:1.0f
                                                                        target:self
                                                                      selector:@selector(updateStatsOverlay)
@@ -432,7 +435,7 @@
         [self presentViewController:conTermAlert animated:YES completion:nil];
     });
 
-    [_streamMan stopStream];
+    [_streamSession stop];
 }
 
 - (void) stageStarting:(const char*)stageName {
@@ -477,7 +480,7 @@
         [self presentViewController:alert animated:YES completion:nil];
     });
 
-    [_streamMan stopStream];
+    [_streamSession stop];
 }
 
 - (void) launchFailed:(NSString*)message {
@@ -557,7 +560,7 @@
             dynamicRange = 0; // SDR
         }
 
-        AVDisplayCriteria* displayCriteria = [[AVDisplayCriteria alloc] initWithRefreshRate:[_settings.framerate floatValue]
+        AVDisplayCriteria* displayCriteria = [[AVDisplayCriteria alloc] initWithRefreshRate:(float)self.streamConfig.frameRate
                                                                           videoDynamicRange:dynamicRange];
         displayManager.preferredDisplayCriteria = displayCriteria;
     }

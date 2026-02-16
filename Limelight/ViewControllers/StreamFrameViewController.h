@@ -10,18 +10,19 @@
 
 #if !TARGET_OS_VISION
 
-#import "Connection.h"
 #import "StreamConfiguration.h"
 #import "StreamView.h"
 
 #import <UIKit/UIKit.h>
 
+#define CONN_TEST_SERVER "ios.conntest.moonlight-stream.org"
+
 #if TARGET_OS_TV
 @import GameController;
 
-@interface StreamFrameViewController : GCEventViewController <ConnectionCallbacks, ControllerSupportDelegate, UserInteractionDelegate, UIScrollViewDelegate>
+@interface StreamFrameViewController : GCEventViewController <ControllerSupportDelegate, UserInteractionDelegate, UIScrollViewDelegate>
 #else
-@interface StreamFrameViewController : UIViewController <ConnectionCallbacks, ControllerSupportDelegate, UserInteractionDelegate, UIScrollViewDelegate>
+@interface StreamFrameViewController : UIViewController <ControllerSupportDelegate, UserInteractionDelegate, UIScrollViewDelegate>
 #endif
 @property (nonatomic) StreamConfiguration* streamConfig;
 @property (nonatomic, copy) void (^onDismiss)(void);

@@ -84,24 +84,6 @@ let moonlightApp = Target.target(
         // VisionStreamViewController (visionOS streaming)
         "Limelight/ViewControllers/VisionStreamViewController.h",
         "Limelight/ViewControllers/VisionStreamViewController.m",
-        // Network (needed by StreamManager)
-        "Limelight/Network/HttpManager.h",
-        "Limelight/Network/HttpManager.m",
-        "Limelight/Network/HttpRequest.h",
-        "Limelight/Network/HttpRequest.m",
-        "Limelight/Network/HttpResponse.h",
-        "Limelight/Network/HttpResponse.m",
-        "Limelight/Network/ServerInfoResponse.h",
-        "Limelight/Network/ServerInfoResponse.m",
-        // Database models (needed by Network/Streaming layer)
-        "Limelight/Database/DataManager.h",
-        "Limelight/Database/DataManager.m",
-        "Limelight/Database/TemporaryHost.h",
-        "Limelight/Database/TemporaryHost.m",
-        "Limelight/Database/TemporaryApp.h",
-        "Limelight/Database/TemporaryApp.m",
-        "Limelight/Database/TemporarySettings.h",
-        "Limelight/Database/TemporarySettings.m",
     ],
     resources: [
         "Limelight/Images.xcassets",
@@ -135,8 +117,6 @@ let moonlightApp = Target.target(
                 "$(SRCROOT)/Limelight/Input",
                 "$(SRCROOT)/Limelight/Crypto",
                 "$(SRCROOT)/Limelight/Utility",
-                "$(SRCROOT)/Limelight/Network",
-                "$(SRCROOT)/Limelight/Database",
                 "$(SRCROOT)/Limelight/ViewControllers",
                 "$(SRCROOT)/Shared/Audio",
                 "$(SRCROOT)/Limelight/Metal",

@@ -9,15 +9,23 @@
 #if TARGET_OS_VISION
 
 #import "VisionStreamViewController.h"
-#import "StreamManager.h"
 #import "Utils.h"
+
+#if __has_include("Moonlight_Vision-Swift.h")
+#import "Moonlight_Vision-Swift.h"
+#elif __has_include("Moonlight-Swift.h")
+#import "Moonlight-Swift.h"
+#endif
 
 @import AVFoundation;
 
 #include <Limelight.h>
 
+@interface VisionStreamViewController () <StreamConnectionDelegate>
+@end
+
 @implementation VisionStreamViewController {
-    StreamManager *_streamMan;
+    StreamSession *_streamSession;
     ControllerSupport *_controllerSupport;
     AVSampleBufferDisplayLayer *_displayLayer;
     UIActivityIndicatorView *_spinner;
@@ -64,13 +72,11 @@
     // Get renderer from display layer
     AVSampleBufferVideoRenderer *renderer = _displayLayer.sampleBufferRenderer;
 
-    // Create and start stream
-    _streamMan = [[StreamManager alloc] initWithConfig:self.streamConfig
-                                            renderView:self.view
-                              sampleBufferVideoRenderer:renderer
-                                   connectionCallbacks:self];
-    NSOperationQueue *opQueue = [[NSOperationQueue alloc] init];
-    [opQueue addOperation:_streamMan];
+    // Create and start stream session
+    _streamSession = [[StreamSession alloc] initWithConfig:self.streamConfig
+                                             videoRenderer:renderer
+                                                  delegate:self];
+    [_streamSession start];
 
     [UIApplication sharedApplication].idleTimerDisabled = YES;
 }
@@ -84,7 +90,7 @@
     if (parent == nil) {
         [_controllerSupport cleanup];
         [UIApplication sharedApplication].idleTimerDisabled = NO;
-        [_streamMan stopStream];
+        [_streamSession stop];
     }
 }
 
@@ -96,7 +102,7 @@
     }
 }
 
-// MARK: - ConnectionCallbacks
+// MARK: - StreamConnectionDelegate
 
 - (void)connectionStarted {
     Log(LOG_I, @"Connection started (visionOS)");
@@ -156,7 +162,7 @@
         [self presentViewController:alert animated:YES completion:nil];
     });
 
-    [_streamMan stopStream];
+    [_streamSession stop];
 }
 
 - (void)stageStarting:(const char *)stageName {
@@ -193,7 +199,7 @@
         [self presentViewController:alert animated:YES completion:nil];
     });
 
-    [_streamMan stopStream];
+    [_streamSession stop];
 }
 
 - (void)launchFailed:(NSString *)message {

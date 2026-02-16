@@ -23,7 +23,7 @@ final class MoonlightClient: Sendable {
         } else {
             self.baseHTTPSURL = nil
         }
-        self.uniqueId = IdManager.getUniqueId()
+        self.uniqueId = Self.getUniqueId()
         self.deviceName = "roth"
         self.sslDelegate = SSLPinningDelegate(serverCert: serverCert)
         self.session = URLSession(
@@ -221,6 +221,17 @@ final class MoonlightClient: Sendable {
     func unpair() async throws {
         let url = "\(baseHTTPURL)/unpair?uniqueid=\(uniqueId)"
         _ = try await fetchRaw(url: url, timeout: Self.normalTimeout)
+    }
+
+    // MARK: - Unique ID
+
+    static func getUniqueId() -> String {
+        if let id = UserDefaults.standard.string(forKey: "uniqueId"), !id.isEmpty {
+            return id
+        }
+        let id = String(format: "%016llx", UInt64(arc4random()) << 32 | UInt64(arc4random()))
+        UserDefaults.standard.set(id, forKey: "uniqueId")
+        return id
     }
 
     // MARK: - Private Helpers

@@ -11,7 +11,6 @@
 
 #import "OnScreenControls.h"
 
-#import "DataManager.h"
 #include "Limelight.h"
 
 @import GameController;
@@ -994,14 +993,12 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
         mask = 0x1;
     }
     
-    DataManager* dataMan = [[DataManager alloc] init];
-    TemporarySettings* settings = [dataMan getSettings];
-    OnScreenControlsLevel level = (OnScreenControlsLevel)[settings.onscreenControls integerValue];
-    
+    OnScreenControlsLevel level = (OnScreenControlsLevel)streamConfig.onscreenControls;
+
     // Even if no gamepads are present, we will always count one if OSC is enabled,
     // or it's set to auto and no keyboard or mouse is present. Absolute touch mode
     // disables the OSC.
-    if (level != OnScreenControlsLevelOff && (![ControllerSupport hasKeyboardOrMouse] || level != OnScreenControlsLevelAuto) && !settings.absoluteTouchMode) {
+    if (level != OnScreenControlsLevelOff && (![ControllerSupport hasKeyboardOrMouse] || level != OnScreenControlsLevelAuto) && !streamConfig.absoluteTouchMode) {
         mask |= 0x1;
     }
     
@@ -1027,8 +1024,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     _oscController = [[Controller alloc] init];
     _oscController.playerIndex = 0;
 
-    DataManager* dataMan = [[DataManager alloc] init];
-    _oscEnabled = (OnScreenControlsLevel)[[dataMan getSettings].onscreenControls integerValue] != OnScreenControlsLevelOff;
+    _oscEnabled = (OnScreenControlsLevel)streamConfig.onscreenControls != OnScreenControlsLevelOff;
     
     Log(LOG_I, @"Number of supported controllers connected: %d", [ControllerSupport getGamepadCount]);
     Log(LOG_I, @"Multi-controller: %d", _multiController);

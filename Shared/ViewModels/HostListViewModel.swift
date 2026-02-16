@@ -189,6 +189,9 @@ final class HostListViewModel {
         config.swapABXYButtons = settings.swapABXYButtons
         config.playAudioOnPC = settings.playAudioOnPC
         config.useFramePacing = settings.useFramePacing
+        config.absoluteTouchMode = settings.absoluteTouchMode
+        config.onscreenControls = settings.onscreenControls
+        config.statsOverlay = settings.statsOverlay
         config.serverCert = host.serverCert
         config.serverCodecModeSupport = host.serverCodecModeSupport
         config.appVersion = host.appVersion

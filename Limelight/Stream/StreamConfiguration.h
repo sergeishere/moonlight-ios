@@ -32,5 +32,8 @@
 @property BOOL useFramePacing;
 @property BOOL isResume;
 @property NSData* serverCert;
+@property BOOL absoluteTouchMode;
+@property int onscreenControls;
+@property BOOL statsOverlay;
 
 @end

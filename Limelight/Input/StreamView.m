@@ -9,7 +9,6 @@
 #import "StreamView.h"
 #import <objc/runtime.h>
 #include <Limelight.h>
-#import "DataManager.h"
 #import "ControllerSupport.h"
 #import "KeyboardSupport.h"
 #import "RelativeTouchHandler.h"
@@ -45,9 +44,7 @@
                   config:(StreamConfiguration*)streamConfig {
     self->interactionDelegate = interactionDelegate;
     self->streamAspectRatio = (float)streamConfig.width / (float)streamConfig.height;
-    
-    TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
-    
+
     keysDown = [[NSMutableSet alloc] init];
     keyInputField = [[KeyboardInputField alloc] initWithFrame:CGRectZero];
     [keyInputField setKeyboardType:UIKeyboardTypeDefault];
@@ -61,7 +58,7 @@
     self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self];
 #else
     // iOS uses RelativeTouchHandler or AbsoluteTouchHandler depending on user preference
-    if (settings.absoluteTouchMode) {
+    if (streamConfig.absoluteTouchMode) {
         self->touchHandler = [[AbsoluteTouchHandler alloc] initWithView:self];
     }
     else {
@@ -69,8 +66,8 @@
     }
     
     onScreenControls = [[OnScreenControls alloc] initWithView:self controllerSup:controllerSupport streamConfig:streamConfig];
-    OnScreenControlsLevel level = (OnScreenControlsLevel)[settings.onscreenControls integerValue];
-    if (settings.absoluteTouchMode) {
+    OnScreenControlsLevel level = (OnScreenControlsLevel)streamConfig.onscreenControls;
+    if (streamConfig.absoluteTouchMode) {
         Log(LOG_I, @"On-screen controls disabled in absolute touch mode");
         [onScreenControls setLevel:OnScreenControlsLevelOff];
     }

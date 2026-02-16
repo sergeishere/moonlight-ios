@@ -11,7 +11,6 @@ import os
 
 // MARK: - OnScreenControlsLevel
 
-@objc(OnScreenControlsLevel)
 enum OnScreenControlsLevel: Int {
     case off = 0
     case auto
@@ -26,8 +25,7 @@ enum OnScreenControlsLevel: Int {
 
 // MARK: - OnScreenControls
 
-@objc(OnScreenControls)
-class OnScreenControls: NSObject {
+class OnScreenControls {
 
     private static let logger = Logger(subsystem: "Moonlight", category: "OnScreenControls")
 
@@ -134,7 +132,7 @@ class OnScreenControls: NSObject {
 
     // MARK: - Init
 
-    @objc init?(view: UIView, controllerSup controllerSupport: ControllerSupport, streamConfig: StreamConfiguration) {
+    init?(view: UIView, controllerSup controllerSupport: ControllerSupport, streamConfig: StreamConfiguration) {
         self.view = view
         self.controllerSupport = controllerSupport
         self.controller = controllerSupport.getOscController()
@@ -152,18 +150,16 @@ class OnScreenControls: NSObject {
             area.size.width -= area.origin.x * 2
         }
         self.controlArea = area
-
-        super.init()
     }
 
     // MARK: - Public API
 
-    @objc func show() {
+    func show() {
         visible = true
         updateControls()
     }
 
-    @objc func setLevel(_ level: OnScreenControlsLevel) {
+    func setLevel(_ level: OnScreenControlsLevel) {
         self.level = level
 
         // Only update controls if we're showing, otherwise show will do it for us.
@@ -172,7 +168,7 @@ class OnScreenControls: NSObject {
         }
     }
 
-    @objc func getLevel() -> OnScreenControlsLevel {
+    func getLevel() -> OnScreenControlsLevel {
         return level
     }
 

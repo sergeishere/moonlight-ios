@@ -1,41 +1,41 @@
 import Foundation
 import GameController
 
-@objc final class Controller: NSObject, @unchecked Sendable {
+final class Controller: @unchecked Sendable {
     struct TouchContext {
         var lastX: Float = 0
         var lastY: Float = 0
     }
 
-    @objc var gamepad: GCController?
-    @objc var playerIndex: Int32 = 0
-    @objc var lastButtonFlags: Int32 = 0
-    @objc var emulatingButtonFlags: Int32 = 0
-    @objc var supportedEmulationFlags: Int32 = 0
-    @objc var lastLeftTrigger: UInt8 = 0
-    @objc var lastRightTrigger: UInt8 = 0
-    @objc var lastLeftStickX: Int16 = 0
-    @objc var lastLeftStickY: Int16 = 0
-    @objc var lastRightStickX: Int16 = 0
-    @objc var lastRightStickY: Int16 = 0
+    var gamepad: GCController?
+    var playerIndex: Int32 = 0
+    var lastButtonFlags: Int32 = 0
+    var emulatingButtonFlags: Int32 = 0
+    var supportedEmulationFlags: Int32 = 0
+    var lastLeftTrigger: UInt8 = 0
+    var lastRightTrigger: UInt8 = 0
+    var lastLeftStickX: Int16 = 0
+    var lastLeftStickY: Int16 = 0
+    var lastRightStickX: Int16 = 0
+    var lastRightStickY: Int16 = 0
 
     var primaryTouch = TouchContext()
     var secondaryTouch = TouchContext()
 
-    @objc var lowFreqMotor: HapticContext?
-    @objc var highFreqMotor: HapticContext?
-    @objc var leftTriggerMotor: HapticContext?
-    @objc var rightTriggerMotor: HapticContext?
+    var lowFreqMotor: HapticContext?
+    var highFreqMotor: HapticContext?
+    var leftTriggerMotor: HapticContext?
+    var rightTriggerMotor: HapticContext?
 
-    @objc var accelTimer: Timer?
+    var accelTimer: Timer?
     var lastAccelSample = GCAcceleration()
-    @objc var gyroTimer: Timer?
+    var gyroTimer: Timer?
     var lastGyroSample = GCRotationRate()
 
-    @objc var batteryTimer: Timer?
-    @objc var lastBatteryState: GCDeviceBattery.State = .unknown
-    @objc var lastBatteryLevel: Float = 0
+    var batteryTimer: Timer?
+    var lastBatteryState: GCDeviceBattery.State = .unknown
+    var lastBatteryLevel: Float = 0
 
-    @objc var reportedArrival = false
-    @objc weak var mergedWithController: Controller?
+    var reportedArrival = false
+    weak var mergedWithController: Controller?
 }

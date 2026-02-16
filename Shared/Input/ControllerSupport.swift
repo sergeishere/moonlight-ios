@@ -12,7 +12,7 @@ protocol ControllerSupportDelegate: AnyObject {
     func streamExitRequested()
 }
 
-@objc final class ControllerSupport: NSObject, @unchecked Sendable {
+final class ControllerSupport: @unchecked Sendable {
     private static let logger = Logger(subsystem: "Moonlight", category: "ControllerSupport")
 
     private let controllerStreamLock = NSLock()
@@ -46,8 +46,6 @@ protocol ControllerSupportDelegate: AnyObject {
         oscController = Controller()
         oscController.playerIndex = 0
         oscEnabled = OnScreenControlsLevel(rawValue: Int(streamConfig.onscreenControls)) != .off
-
-        super.init()
 
         Self.logger.info("Number of supported controllers connected: \(Self.getGamepadCount())")
         Self.logger.info("Multi-controller: \(self.multiController)")
@@ -133,13 +131,13 @@ protocol ControllerSupportDelegate: AnyObject {
 
     // MARK: - Public API
 
-    @objc func connectionEstablished() {
+    func connectionEstablished() {
         for controller in controllers.values {
             reportControllerArrival(controller)
         }
     }
 
-    @objc func cleanup() {
+    func cleanup() {
         if let o = controllerConnectObserver { NotificationCenter.default.removeObserver(o) }
         if let o = controllerDisconnectObserver { NotificationCenter.default.removeObserver(o) }
         if let o = mouseConnectObserver { NotificationCenter.default.removeObserver(o) }
@@ -174,20 +172,20 @@ protocol ControllerSupportDelegate: AnyObject {
         }
     }
 
-    @objc func getOscController() -> Controller {
+    func getOscController() -> Controller {
         oscController
     }
 
-    @objc func getConnectedGamepadCount() -> Int {
+    func getConnectedGamepadCount() -> Int {
         controllers.count
     }
 
-    @objc func initAutoOnScreenControlMode(_ osc: OnScreenControls) {
+    func initAutoOnScreenControlMode(_ osc: OnScreenControls) {
         self.osc = osc
         updateAutoOnScreenControlMode()
     }
 
-    @objc static func getConnectedGamepadMask(_ streamConfig: StreamConfiguration) -> Int32 {
+    static func getConnectedGamepadMask(_ streamConfig: StreamConfiguration) -> Int32 {
         var mask: Int32 = 0
 
         if streamConfig.multiController {
@@ -212,40 +210,40 @@ protocol ControllerSupportDelegate: AnyObject {
 
     // MARK: - Button/stick/trigger updates (called from OnScreenControls & StreamView)
 
-    @objc func updateLeftStick(_ controller: Controller, x: Int16, y: Int16) {
+    func updateLeftStick(_ controller: Controller, x: Int16, y: Int16) {
         objc_sync_enter(controller)
         controller.lastLeftStickX = x
         controller.lastLeftStickY = y
         objc_sync_exit(controller)
     }
 
-    @objc func updateRightStick(_ controller: Controller, x: Int16, y: Int16) {
+    func updateRightStick(_ controller: Controller, x: Int16, y: Int16) {
         objc_sync_enter(controller)
         controller.lastRightStickX = x
         controller.lastRightStickY = y
         objc_sync_exit(controller)
     }
 
-    @objc func updateLeftTrigger(_ controller: Controller, left: UInt8) {
+    func updateLeftTrigger(_ controller: Controller, left: UInt8) {
         objc_sync_enter(controller)
         controller.lastLeftTrigger = left
         objc_sync_exit(controller)
     }
 
-    @objc func updateRightTrigger(_ controller: Controller, right: UInt8) {
+    func updateRightTrigger(_ controller: Controller, right: UInt8) {
         objc_sync_enter(controller)
         controller.lastRightTrigger = right
         objc_sync_exit(controller)
     }
 
-    @objc func updateTriggers(_ controller: Controller, left: UInt8, right: UInt8) {
+    func updateTriggers(_ controller: Controller, left: UInt8, right: UInt8) {
         objc_sync_enter(controller)
         controller.lastLeftTrigger = left
         controller.lastRightTrigger = right
         objc_sync_exit(controller)
     }
 
-    @objc func updateButtonFlags(_ controller: Controller, flags: Int32) {
+    func updateButtonFlags(_ controller: Controller, flags: Int32) {
         objc_sync_enter(controller)
         let releasedButtons = (controller.lastButtonFlags ^ flags) & ~flags
         let pressedButtons = (controller.lastButtonFlags ^ flags) & flags
@@ -255,21 +253,21 @@ protocol ControllerSupportDelegate: AnyObject {
         objc_sync_exit(controller)
     }
 
-    @objc func setButtonFlag(_ controller: Controller, flags: Int32) {
+    func setButtonFlag(_ controller: Controller, flags: Int32) {
         objc_sync_enter(controller)
         controller.lastButtonFlags |= flags
         handleSpecialCombosPressed(controller, pressedButtons: flags)
         objc_sync_exit(controller)
     }
 
-    @objc func clearButtonFlag(_ controller: Controller, flags: Int32) {
+    func clearButtonFlag(_ controller: Controller, flags: Int32) {
         objc_sync_enter(controller)
         controller.lastButtonFlags &= ~flags
         handleSpecialCombosReleased(controller, releasedButtons: flags)
         objc_sync_exit(controller)
     }
 
-    @objc func updateFinished(_ controller: Controller) {
+    func updateFinished(_ controller: Controller) {
         var exitRequested = false
 
         controllerStreamLock.lock()
@@ -318,7 +316,7 @@ protocol ControllerSupportDelegate: AnyObject {
 
     // MARK: - Rumble / Motion / LED
 
-    @objc func rumble(_ controllerNumber: UInt16, lowFreqMotor: UInt16, highFreqMotor: UInt16) {
+    func rumble(_ controllerNumber: UInt16, lowFreqMotor: UInt16, highFreqMotor: UInt16) {
         let controller = controllers[Int(controllerNumber)]
         if controller == nil && controllerNumber == 0 && oscEnabled {
             // TODO: Rumble emulation for OSC
@@ -329,7 +327,7 @@ protocol ControllerSupportDelegate: AnyObject {
         controller.highFreqMotor?.setMotorAmplitude(highFreqMotor)
     }
 
-    @objc func rumbleTriggers(_ controllerNumber: UInt16, leftTrigger: UInt16, rightTrigger: UInt16) {
+    func rumbleTriggers(_ controllerNumber: UInt16, leftTrigger: UInt16, rightTrigger: UInt16) {
         let controller = controllers[Int(controllerNumber)]
         if controller == nil && controllerNumber == 0 && oscEnabled {
             // TODO: Trigger rumble emulation for OSC
@@ -340,7 +338,7 @@ protocol ControllerSupportDelegate: AnyObject {
         controller.rightTriggerMotor?.setMotorAmplitude(rightTrigger)
     }
 
-    @objc func setMotionEventState(_ controllerNumber: UInt16, motionType: UInt8, reportRateHz: UInt16) {
+    func setMotionEventState(_ controllerNumber: UInt16, motionType: UInt8, reportRateHz: UInt16) {
         guard let controller = controllers[Int(controllerNumber)],
               let motion = controller.gamepad?.motion else { return }
 
@@ -402,7 +400,7 @@ protocol ControllerSupportDelegate: AnyObject {
         }
     }
 
-    @objc func setControllerLed(_ controllerNumber: UInt16, r: UInt8, g: UInt8, b: UInt8) {
+    func setControllerLed(_ controllerNumber: UInt16, r: UInt8, g: UInt8, b: UInt8) {
         guard let controller = controllers[Int(controllerNumber)],
               let light = controller.gamepad?.light else { return }
 
@@ -411,7 +409,7 @@ protocol ControllerSupportDelegate: AnyObject {
 
     // MARK: - Static helpers
 
-    @objc static func hasKeyboardOrMouse() -> Bool {
+    static func hasKeyboardOrMouse() -> Bool {
         GCMouse.mice().count > 0 || GCKeyboard.coalesced != nil
     }
 

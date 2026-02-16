@@ -127,7 +127,7 @@ final class MoonlightClient: Sendable {
             fps = config.frameRate
         }
 
-        let riKeyHex = config.riKey.map { AddressUtils.bytesToHex($0) } ?? ""
+        let riKeyHex = AddressUtils.bytesToHex(config.riKey)
         let videoFormatMask10Bit: Int32 = 0x2200
         let hdrParam: String
         if (config.supportedVideoFormats & videoFormatMask10Bit) != 0 {

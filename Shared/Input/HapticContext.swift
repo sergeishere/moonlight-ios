@@ -3,7 +3,7 @@ import CoreHaptics
 import GameController
 import os
 
-@objc final class HapticContext: NSObject {
+final class HapticContext {
     private let playerIndex: GCControllerPlayerIndex
     private var hapticEngine: CHHapticEngine?
     private var hapticPlayer: (any CHHapticPatternPlayer)?
@@ -29,8 +29,6 @@ import os
         }
         self.hapticEngine = engine
 
-        super.init()
-
         do {
             try engine.start()
         } catch {
@@ -55,7 +53,7 @@ import os
         }
     }
 
-    @objc func setMotorAmplitude(_ amplitude: UInt16) {
+    func setMotorAmplitude(_ amplitude: UInt16) {
         guard hapticEngine != nil else { return }
 
         if amplitude == 0 {
@@ -91,7 +89,7 @@ import os
         }
     }
 
-    @objc func cleanup() {
+    func cleanup() {
         try? hapticPlayer?.cancel()
         hapticPlayer = nil
         hapticEngine?.stop(completionHandler: nil)
@@ -100,19 +98,19 @@ import os
 
     // MARK: - Factory methods
 
-    @objc static func createForHighFreqMotor(_ gamepad: GCController) -> HapticContext? {
+    static func createForHighFreqMotor(_ gamepad: GCController) -> HapticContext? {
         HapticContext(gamepad: gamepad, locality: .rightHandle)
     }
 
-    @objc static func createForLowFreqMotor(_ gamepad: GCController) -> HapticContext? {
+    static func createForLowFreqMotor(_ gamepad: GCController) -> HapticContext? {
         HapticContext(gamepad: gamepad, locality: .leftHandle)
     }
 
-    @objc static func createForLeftTrigger(_ gamepad: GCController) -> HapticContext? {
+    static func createForLeftTrigger(_ gamepad: GCController) -> HapticContext? {
         HapticContext(gamepad: gamepad, locality: .leftTrigger)
     }
 
-    @objc static func createForRightTrigger(_ gamepad: GCController) -> HapticContext? {
+    static func createForRightTrigger(_ gamepad: GCController) -> HapticContext? {
         HapticContext(gamepad: gamepad, locality: .rightTrigger)
     }
 }

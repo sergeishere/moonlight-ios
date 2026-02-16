@@ -24,7 +24,6 @@ private class ToolbarButton: UIButton {
 
 // MARK: - StreamView
 
-@objc(StreamView)
 class StreamView: UIView, UITextFieldDelegate {
 
     private var onScreenControls: OnScreenControls?
@@ -141,13 +140,13 @@ class StreamView: UIView, UITextFieldDelegate {
 
     // MARK: - On-Screen Controls
 
-    @objc func showOnScreenControls() {
+    func showOnScreenControls() {
         #if !os(tvOS)
         onScreenControls?.show()
         #endif
     }
 
-    @objc func getCurrentOscState() -> OnScreenControlsLevel {
+    func getCurrentOscState() -> OnScreenControlsLevel {
         onScreenControls?.getLevel() ?? .off
     }
 
@@ -383,7 +382,7 @@ class StreamView: UIView, UITextFieldDelegate {
     // MARK: - Mouse Cursor (non-tvOS)
 
     #if !os(tvOS)
-    @objc func updateCursorLocation(_ location: CGPoint, isMouse: Bool) {
+    func updateCursorLocation(_ location: CGPoint, isMouse: Bool) {
         let normalized = adjustCoordinatesForVideoArea(location)
         let videoSize = getVideoAreaSize()
 

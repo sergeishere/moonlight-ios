@@ -143,7 +143,7 @@ private func clSetControllerLED(_ controllerNumber: UInt16, _ r: UInt8, _ g: UIn
 
 // MARK: - MoonlightConnection
 
-@objc final class MoonlightConnection: NSObject, @unchecked Sendable {
+final class MoonlightConnection: @unchecked Sendable {
     private let config: StreamConfiguration
     private let renderer: VideoDecoder
 
@@ -168,12 +168,11 @@ private func clSetControllerLED(_ controllerNumber: UInt16, _ r: UInt8, _ g: UIn
     init(config: StreamConfiguration, renderer: VideoDecoder) {
         self.config = config
         self.renderer = renderer
-        super.init()
 
         StreamCallbackRouter.shared.videoDecoder = renderer
 
         // Host address
-        let rawAddress = Utils.addressPortString(toAddress: config.host) ?? ""
+        let rawAddress = AddressUtils.parseAddressAndPort(config.host ?? "").address
         strncpy(&hostString, rawAddress.cString(using: .utf8)!, hostString.count - 1)
         if let appVer = config.appVersion {
             strncpy(&appVersionString, appVer.cString(using: .utf8)!, appVersionString.count - 1)
@@ -285,7 +284,7 @@ private func clSetControllerLED(_ controllerNumber: UInt16, _ r: UInt8, _ g: UIn
         return stats.endTime != 0 ? stats : nil
     }
 
-    @objc func getActiveCodecName() -> String {
+    func getActiveCodecName() -> String {
         switch Self.activeVideoFormat {
         case VIDEO_FORMAT_H264:
             return "H.264"
@@ -302,7 +301,7 @@ private func clSetControllerLED(_ controllerNumber: UInt16, _ r: UInt8, _ g: UIn
         }
     }
 
-    @objc func getStatsOverlayText() -> String? {
+    func getStatsOverlayText() -> String? {
         guard let stats = getVideoStats() else { return nil }
 
         var rtt: UInt32 = 0

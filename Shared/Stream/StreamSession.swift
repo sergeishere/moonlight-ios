@@ -1,4 +1,5 @@
 import Foundation
+import Security
 
 final class StreamSession: @unchecked Sendable {
     let config: StreamConfiguration
@@ -16,7 +17,9 @@ final class StreamSession: @unchecked Sendable {
         self.config = config
         self.videoRenderer = videoRenderer
         self.delegate = delegate
-        config.riKey = Utils.randomBytes(16)
+        var keyBytes = [UInt8](repeating: 0, count: 16)
+        _ = SecRandomCopyBytes(kSecRandomDefault, keyBytes.count, &keyBytes)
+        config.riKey = Data(keyBytes)
         config.riKeyId = Int32(arc4random())
     }
     #else
@@ -24,7 +27,9 @@ final class StreamSession: @unchecked Sendable {
         self.config = config
         self.frameQueue = frameQueue
         self.delegate = delegate
-        config.riKey = Utils.randomBytes(16)
+        var keyBytes = [UInt8](repeating: 0, count: 16)
+        _ = SecRandomCopyBytes(kSecRandomDefault, keyBytes.count, &keyBytes)
+        config.riKey = Data(keyBytes)
         config.riKeyId = Int32(arc4random())
     }
     #endif

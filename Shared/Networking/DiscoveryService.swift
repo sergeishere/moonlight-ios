@@ -181,7 +181,7 @@ final class DiscoveryService {
     private func handleLostEndpoint(name: String) {
         guard let host = discoveredHosts.first(where: { $0.name == name }) else { return }
         stopPoller(for: host)
-        host.state = Int(HostState.offline.rawValue)
+        host.state = HostState.offline.rawValue
     }
 
     // MARK: - Polling
@@ -283,7 +283,7 @@ final class DiscoveryService {
                     log.info("Poller for '\(hostName)' stopped — host went offline")
                     self.pollers.removeValue(forKey: hostUUID)
                     if let host = self.discoveredHosts.first(where: { $0.uuid == hostUUID }) {
-                        host.state = Int(HostState.offline.rawValue)
+                        host.state = HostState.offline.rawValue
                     }
                 }
             )
@@ -346,7 +346,7 @@ final class DiscoveryService {
             // Fix pairState for hosts that have a server cert but lost their pair status
             var needsSave = false
             for host in discoveredHosts where host.serverCert != nil && !host.isPaired {
-                host.pairState = Int(PairState.paired.rawValue)
+                host.pairState = PairState.paired.rawValue
                 log.info("Fixed pairState for '\(host.name)' (had cert but was not marked paired)")
                 needsSave = true
             }
@@ -354,7 +354,7 @@ final class DiscoveryService {
 
             // Saved hosts start as offline — Bonjour will update them to online
             for host in discoveredHosts {
-                host.state = Int(HostState.offline.rawValue)
+                host.state = HostState.offline.rawValue
                 host.activeAddress = host.bestAddress
             }
 

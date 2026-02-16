@@ -231,7 +231,7 @@ final class HostListViewModel {
 
     func unpairHost(_ host: Host) {
         host.serverCert = nil
-        host.pairState = Int(PairState.unpaired.rawValue)
+        host.pairState = PairState.unpaired.rawValue
         if selectedHost?.uuid == host.uuid {
             disconnect()
         }
@@ -246,7 +246,7 @@ final class HostListViewModel {
                 try Task.checkCancellation()
                 let serverCert = try await pairingService.pair(host: host)
                 host.serverCert = serverCert
-                host.pairState = Int(PairState.paired.rawValue)
+                host.pairState = PairState.paired.rawValue
                 discoveryService.saveContext()
             } catch is CancellationError {
                 // User cancelled via WebView dismiss or task cancellation

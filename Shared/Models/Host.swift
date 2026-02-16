@@ -1,6 +1,18 @@
 import SwiftData
 import Foundation
 
+enum PairState: Int {
+    case unknown = 0
+    case unpaired = 1
+    case paired = 2
+}
+
+enum HostState: Int {
+    case unknown = 0
+    case offline = 1
+    case online = 2
+}
+
 @Model
 final class Host {
     // MARK: - Persisted properties
@@ -43,9 +55,9 @@ final class Host {
 
     // MARK: - Computed helpers
 
-    var isPaired: Bool { pairState == Int(PairState.paired.rawValue) }
-    var isOnline: Bool { state == Int(HostState.online.rawValue) }
-    var isStatusUnknown: Bool { state == Int(HostState.unknown.rawValue) }
+    var isPaired: Bool { pairState == PairState.paired.rawValue }
+    var isOnline: Bool { state == HostState.online.rawValue }
+    var isStatusUnknown: Bool { state == HostState.unknown.rawValue }
     var isAstrumServer: Bool { astrumVersion >= 1 }
 
     var bestAddress: String? {
@@ -115,15 +127,15 @@ final class Host {
         // Pair status: don't downgrade to unpaired if we have a server cert
         // (local proof of successful pairing — server may not report paired over HTTP)
         if info.isPaired {
-            pairState = Int(PairState.paired.rawValue)
+            pairState = PairState.paired.rawValue
         } else if serverCert == nil {
-            pairState = Int(PairState.unpaired.rawValue)
+            pairState = PairState.unpaired.rawValue
         }
 
         if let codecMode = info.serverCodecModeSupport {
             serverCodecModeSupport = Int32(codecMode)
         }
 
-        state = Int(HostState.online.rawValue)
+        state = HostState.online.rawValue
     }
 }

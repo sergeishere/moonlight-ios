@@ -11,7 +11,7 @@ final class HostConnectionService: Sendable {
             host.updateFromServerInfo(serverInfo)
             return true
         } catch {
-            host.state = Int(HostState.offline.rawValue)
+            host.state = HostState.offline.rawValue
             return false
         }
     }

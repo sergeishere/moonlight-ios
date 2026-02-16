@@ -153,16 +153,12 @@
     _tipLabel.textAlignment = NSTextAlignmentCenter;
     _tipLabel.center = CGPointMake(self.view.frame.size.width / 2, self.view.frame.size.height * 0.9);
 
-    // Create MetalViewController — it will be started later in connectionStarted
+    // Create MetalViewController (init only — defers Metal device/pipeline setup
+    // until connectionStarted to avoid blocking the main thread during presentation)
     _metalViewController = [[MetalViewController alloc]
         initWithFrame:_streamView.bounds
             framerate:self.streamConfig.frameRate
             enableHdr:NO];
-    [self addChildViewController:_metalViewController];
-    [_streamView insertSubview:_metalViewController.view atIndex:0];
-    _metalViewController.view.frame = _streamView.bounds;
-    _metalViewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [_metalViewController didMoveToParentViewController:self];
 
     // Create StreamManager with the MetalViewController's frame queue
     _streamMan = [[StreamManager alloc] initWithConfig:self.streamConfig
@@ -336,6 +332,14 @@
 - (void) connectionStarted {
     Log(LOG_I, @"Connection started");
     dispatch_async(dispatch_get_main_queue(), ^{
+        // Set up Metal rendering now that the connection is established.
+        // This is deferred from viewDidLoad to avoid blocking the presentation animation.
+        [self addChildViewController:self->_metalViewController];
+        [self->_streamView insertSubview:self->_metalViewController.view atIndex:0];
+        self->_metalViewController.view.frame = self->_streamView.bounds;
+        self->_metalViewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [self->_metalViewController didMoveToParentViewController:self];
+
         self->_stageLabel.hidden = YES;
         self->_tipLabel.hidden = YES;
 

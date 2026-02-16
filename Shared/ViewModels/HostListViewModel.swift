@@ -118,25 +118,35 @@ final class HostListViewModel {
     }
 
     func fetchApps(for host: Host) async {
-        loadingApps = true
-        let appInfos = await connectionService.fetchAppList(for: host)
-        var updatedApps: [App] = []
-        for info in appInfos.sorted(by: { $0.name < $1.name }) {
-            if let existing = host.appList.first(where: { $0.id == info.id }) {
-                existing.updateFromAppInfo(info)
-                updatedApps.append(existing)
-            } else {
-                let app = App(host: host)
-                app.updateFromAppInfo(info)
-                host.appList.append(app)
-                updatedApps.append(app)
-            }
+        // Show cached apps immediately from SwiftData
+        let cached = host.appList.sorted(by: { $0.name < $1.name })
+        if !cached.isEmpty {
+            apps = cached
+        } else {
+            loadingApps = true
         }
-        apps = updatedApps
+
+        // Refresh from server in background
+        let appInfos = await connectionService.fetchAppList(for: host)
+        if !appInfos.isEmpty {
+            var updatedApps: [App] = []
+            for info in appInfos.sorted(by: { $0.name < $1.name }) {
+                if let existing = host.appList.first(where: { $0.id == info.id }) {
+                    existing.updateFromAppInfo(info)
+                    updatedApps.append(existing)
+                } else {
+                    let app = App(host: host)
+                    app.updateFromAppInfo(info)
+                    host.appList.append(app)
+                    updatedApps.append(app)
+                }
+            }
+            apps = updatedApps
+        }
         loadingApps = false
 
         boxArtTask?.cancel()
-        boxArtTask = Task { await loadBoxArt(for: updatedApps, host: host) }
+        boxArtTask = Task { await loadBoxArt(for: apps, host: host) }
     }
 
     private func loadBoxArt(for apps: [App], host: Host) async {
